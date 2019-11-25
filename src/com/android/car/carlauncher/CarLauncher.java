@@ -117,7 +117,6 @@ public class CarLauncher extends FragmentActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        startMapsInActivityView();
     }
 
     @Override
