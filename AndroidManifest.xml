@@ -16,8 +16,8 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.carlauncher"
-          android:sharedUserId="android.uid.system">
+     package="com.android.car.carlauncher"
+     android:sharedUserId="android.uid.system">
     <!-- System permission to get app usage data -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <!-- System permission to send events to hosted maps activity -->
@@ -32,32 +32,32 @@
     <!-- System permission to query users on device -->
     <uses-permission android:name="android.permission.MANAGE_USERS"/>
     <uses-permission android:name="android.car.permission.ACCESS_CAR_PROJECTION_STATUS"/>
-    <application
-        android:icon="@drawable/ic_launcher_home"
-        android:label="@string/app_title"
-        android:theme="@style/Theme.Launcher">
-        <activity
-            android:name=".CarLauncher"
-            android:configChanges="uiMode|mcc|mnc"
-            android:launchMode="singleTask"
-            android:clearTaskOnLaunch="true"
-            android:stateNotNeeded="true"
-            android:resumeWhilePausing="true"
-            android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="nosensor">
-            <meta-data android:name="distractionOptimized" android:value="true"/>
+    <application android:icon="@drawable/ic_launcher_home"
+         android:label="@string/app_title"
+         android:theme="@style/Theme.Launcher">
+        <activity android:name=".CarLauncher"
+             android:configChanges="uiMode|mcc|mnc"
+             android:launchMode="singleTask"
+             android:clearTaskOnLaunch="true"
+             android:stateNotNeeded="true"
+             android:resumeWhilePausing="true"
+             android:windowSoftInputMode="adjustPan"
+             android:screenOrientation="nosensor"
+             android:exported="true">
+            <meta-data android:name="distractionOptimized"
+                 android:value="true"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.HOME"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AppGridActivity"
-            android:launchMode="singleInstance"
-            android:exported="true"
-            android:noHistory="true">
-            <meta-data android:name="distractionOptimized" android:value="true"/>
+        <activity android:name=".AppGridActivity"
+             android:launchMode="singleInstance"
+             android:exported="true"
+             android:noHistory="true">
+            <meta-data android:name="distractionOptimized"
+                 android:value="true"/>
         </activity>
     </application>
 </manifest>
