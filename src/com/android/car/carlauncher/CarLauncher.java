@@ -19,18 +19,14 @@ package com.android.car.carlauncher;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityView;
-import android.app.UserSwitchObserver;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.IRemoteCallback;
-import android.os.RemoteException;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
-
 import com.android.car.media.common.PlaybackFragment;
 
 import java.util.Set;
@@ -58,6 +54,7 @@ public class CarLauncher extends FragmentActivity {
     private static final boolean DEBUG = false;
 
     private ActivityView mActivityView;
+    private ViewGroup mActivityViewContainer;
     private boolean mActivityViewReady;
     private boolean mIsStarted;
 
@@ -110,10 +107,8 @@ public class CarLauncher extends FragmentActivity {
             setContentView(R.layout.car_launcher);
         }
         initializeFragments();
-        mActivityView = findViewById(R.id.maps);
-        if (mActivityView != null) {
-            mActivityView.setCallback(mActivityViewCallback);
-        }
+
+        mActivityViewContainer = findViewById(R.id.maps_cardview);
     }
 
     @Override
@@ -134,6 +129,13 @@ public class CarLauncher extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mActivityViewContainer != null) {
+            mActivityView = new ActivityView(this);
+            mActivityViewContainer.addView(mActivityView);
+        }
+        if (mActivityView != null) {
+            mActivityView.setCallback(mActivityViewCallback);
+        }
         mIsStarted = true;
         maybeLogReady();
     }
@@ -141,15 +143,13 @@ public class CarLauncher extends FragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mIsStarted = false;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
         if (mActivityView != null && mActivityViewReady) {
             mActivityView.release();
         }
+        if (mActivityViewContainer != null) {
+            mActivityViewContainer.removeView(mActivityView);
+        }
+        mIsStarted = false;
     }
 
     private void startMapsInActivityView() {
