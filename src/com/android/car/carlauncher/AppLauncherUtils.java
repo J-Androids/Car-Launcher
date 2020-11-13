@@ -244,8 +244,16 @@ class AppLauncherUtils {
                                 selectMediaSourceAndFinish(context, componentName, carMediaManager);
                             }
                         },
-                        context -> AppLauncherUtils.launchApp(context,
-                            packageManager.getLaunchIntentForPackage(packageName)));
+                        context -> {
+                            Intent activityIntent = packageManager.getLaunchIntentForPackage(packageName);
+                            if (activityIntent != null) {
+                                AppLauncherUtils.launchApp(context, activityIntent);
+                            } else if (openMediaCenter) {
+                                AppLauncherUtils.launchApp(context, intent);
+                            } else {
+                                selectMediaSourceAndFinish(context, componentName, carMediaManager);
+                            }
+                        });
                     launchablesMap.put(componentName, appMetaData);
                 }
             }
