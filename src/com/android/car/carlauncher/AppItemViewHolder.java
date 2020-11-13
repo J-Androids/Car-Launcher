@@ -67,10 +67,13 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
         if (isLaunchable) {
             mAppItem.setOnClickListener(v -> app.getLaunchCallback().accept(mContext));
             mAppItem.setLongClickable(app.getAlternateLaunchCallback() != null);
-            mAppItem.setOnLongClickListener(v-> {
-                app.getAlternateLaunchCallback().accept(mContext);
-                return true;
-            });
+
+            if (mAppItem.isLongClickable()) {
+                mAppItem.setOnLongClickListener(v -> {
+                    app.getAlternateLaunchCallback().accept(mContext);
+                    return true;
+                });
+            }
         } else {
             String warningText = mContext.getResources()
                     .getString(R.string.driving_toast_text, app.getDisplayName());
