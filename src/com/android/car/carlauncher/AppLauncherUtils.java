@@ -108,6 +108,13 @@ class AppLauncherUtils {
         }
 
         /**
+         * Returns whether the given componentName is a launcher component.
+         */
+        boolean isLaunchable(ComponentName componentName) {
+            return mLaunchables.containsKey(componentName);
+        }
+
+        /**
          * Returns whether the given componentName is a media service.
          */
         boolean isMediaService(ComponentName componentName) {
@@ -129,6 +136,22 @@ class AppLauncherUtils {
 
     private final static LauncherAppsInfo EMPTY_APPS_INFO = new LauncherAppsInfo(
             Collections.emptyMap(), Collections.emptyMap());
+
+    /*
+     * Gets the activity source in a given package. If there are multiple sources in
+     * the package, returns the first one.
+     */
+    static ComponentName getActivitySource(LauncherApps launcherApps,
+            @NonNull String packageName) {
+
+        List<LauncherActivityInfo> availableActivities =
+                launcherApps.getActivityList(packageName, Process.myUserHandle());
+
+        if (availableActivities == null || availableActivities.isEmpty()) {
+            return null;
+        }
+        return availableActivities.get(0).getComponentName();
+    }
 
     /*
      * Gets the media source in a given package. If there are multiple sources in the package,

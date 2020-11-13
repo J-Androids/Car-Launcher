@@ -329,6 +329,16 @@ public final class AppGridActivity extends Activity implements InsetsChangedList
             //  multiple media services. We need to find a way to get the usage stats per service.
             ComponentName componentName = AppLauncherUtils.getMediaSource(mPackageManager,
                     packageName);
+
+            // Get alternative Component Name in the activity list.
+            ComponentName activityComponentName = AppLauncherUtils.getActivitySource(
+                        getSystemService(LauncherApps.class), packageName);
+
+            if (appsInfo.isLaunchable(activityComponentName)) {
+                // Change app from media class to activity if we found it.
+                componentName = activityComponentName;
+            }
+
             // Exempt media services from background and launcher checks
             if (!appsInfo.isMediaService(componentName)) {
                 // do not include apps that only ran in the background
