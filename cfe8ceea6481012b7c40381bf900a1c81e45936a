@@ -1,0 +1,9 @@
+Autosubmit+1: Bill Yi <byi@google.com>
+Build-Cop-Override+1: Bill Yi <byi@google.com>
+Presubmit-Verified+2: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 21 Dec 2020 22:30:03 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/packages/apps/Car/Launcher/+/1534281
+Project: platform/packages/apps/Car/Launcher
+Branch: refs/heads/master
