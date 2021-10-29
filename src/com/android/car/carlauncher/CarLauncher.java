@@ -19,6 +19,7 @@ package com.android.car.carlauncher;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
@@ -65,6 +66,7 @@ public class CarLauncher extends FragmentActivity {
     private static final boolean DEBUG = false;
 
     private TaskViewManager mTaskViewManager;
+    private ActivityManager mActivityManager;
     private TaskView mTaskView;
     private boolean mTaskViewReady;
     // Tracking this to check if the task in TaskView has crashed in the background.
@@ -115,6 +117,8 @@ public class CarLauncher extends FragmentActivity {
                         + ", mTaskViewTaskId=" + mTaskViewTaskId);
             }
             if (mFocused && mTaskViewTaskId == INVALID_TASK_ID) {
+                // If the task in TaskView is crashed during CarLauncher is background,
+                // We'd like to restart it when CarLauncher becomes foreground and focused.
                 startMapsInTaskView();
             }
         }
@@ -124,6 +128,7 @@ public class CarLauncher extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mActivityManager = getSystemService(ActivityManager.class);
         mCarLauncherTaskId = getTaskId();
         ActivityTaskManager.getInstance().registerTaskStackListener(mTaskStackListener);
 
@@ -168,10 +173,12 @@ public class CarLauncher extends FragmentActivity {
         if (DEBUG) {
             Log.d(TAG, "onResume: mFocused=" + mFocused + ", mTaskViewTaskId=" + mTaskViewTaskId);
         }
-        if (mFocused && mTaskViewTaskId == INVALID_TASK_ID) {
-            // If the task in TaskView is crashed during CarLauncher is background,
-            // We'd like to restart it when CarLauncher becomes foreground.
-            startMapsInTaskView();
+        if (!mTaskViewReady) return;
+        if (mTaskViewTaskId != INVALID_TASK_ID) {
+            // The task in TaskView should be in top to make it visible.
+            // NOTE: Tried setTaskAlwaysOnTop before, the flag has some side effect to hinder
+            // AccessibilityService from finding the correct window geometry: b/197247311
+            mActivityManager.moveTaskToFront(mTaskViewTaskId, /* flags= */ 0);
         }
     }
 
@@ -207,9 +214,6 @@ public class CarLauncher extends FragmentActivity {
         try {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(this,
                     /* enterResId= */ 0, /* exitResId= */ 0);
-            // To show the Activity in TaskView, the Activity should be above the host task in
-            // ActivityStack. This option only effects the host Activity is in resumed.
-            options.setTaskAlwaysOnTop(true);
             mTaskView.startActivity(
                     PendingIntent.getActivity(this, /* requestCode= */ 0, getMapsIntent(),
                             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT),
