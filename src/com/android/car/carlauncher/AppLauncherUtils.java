@@ -16,8 +16,6 @@
 
 package com.android.car.carlauncher;
 
-import static android.car.settings.CarSettings.Secure.KEY_PACKAGES_DISABLED_ON_RESOURCE_OVERUSE;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.Activity;
@@ -27,7 +25,6 @@ import android.car.CarNotConnectedException;
 import android.car.content.pm.CarPackageManager;
 import android.car.media.CarMediaManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -38,8 +35,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Process;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -57,7 +52,6 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,8 +71,6 @@ public class AppLauncherUtils {
     @interface AppTypes {}
     static final int APP_TYPE_LAUNCHABLES = 1;
     static final int APP_TYPE_MEDIA_SERVICES = 2;
-
-    static final String PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR = ";";
 
     private static final String TAG_AUTOMOTIVE_APP = "automotiveApp";
     private static final String TAG_USES = "uses";
@@ -200,7 +192,6 @@ public class AppLauncherUtils {
      */
     @NonNull
     static LauncherAppsInfo getLauncherApps(
-            Context context,
             @NonNull Set<String> appsToHide,
             @NonNull Set<String> customMediaComponents,
             @AppTypes int appTypes,
@@ -216,7 +207,7 @@ public class AppLauncherUtils {
             return EMPTY_APPS_INFO;
         }
 
-        // Using new list since we require a mutable list to do removeIf.
+        // Useing new list since we require a mutable list to do removeIf.
         List<ResolveInfo> mediaServices = new ArrayList<>();
         mediaServices.addAll(
                 packageManager.queryIntentServices(
@@ -254,21 +245,20 @@ public class AppLauncherUtils {
                         componentName,
                         info.serviceInfo.loadIcon(packageManager),
                         isDistractionOptimized,
-                        contextArg -> {
+                        context -> {
                             if (openMediaCenter) {
-                                AppLauncherUtils.launchApp(contextArg, intent);
+                                AppLauncherUtils.launchApp(context, intent);
                             } else {
-                                selectMediaSourceAndFinish(contextArg, componentName,
-                                        carMediaManager);
+                                selectMediaSourceAndFinish(context, componentName, carMediaManager);
                             }
                         },
-                        contextArg -> {
+                        context -> {
                             // getLaunchIntentForPackage looks for a main activity in the category
                             // Intent.CATEGORY_INFO, then Intent.CATEGORY_LAUNCHER, and returns null
                             // if neither are found
                             Intent packageLaunchIntent =
                                     packageManager.getLaunchIntentForPackage(packageName);
-                            AppLauncherUtils.launchApp(contextArg,
+                            AppLauncherUtils.launchApp(context,
                                     packageLaunchIntent != null ? packageLaunchIntent : intent);
                         });
                     launchablesMap.put(componentName, appMetaData);
@@ -298,14 +288,15 @@ public class AppLauncherUtils {
                         componentName,
                         info.getBadgedIcon(0),
                         isDistractionOptimized,
-                        contextArg -> AppLauncherUtils.launchApp(contextArg, intent),
+                        context -> AppLauncherUtils.launchApp(context, intent),
                         null);
                     launchablesMap.put(componentName, appMetaData);
                 }
             }
 
-            List<ResolveInfo> disabledActivities = getDisabledActivities(context, packageManager,
-                    mEnabledPackages);
+            List<ResolveInfo> disabledActivities = getDisabledActivities(
+                    packageManager, mEnabledPackages);
+
             for (ResolveInfo info : disabledActivities) {
                 String packageName = info.activityInfo.packageName;
                 String className = info.activityInfo.name;
@@ -327,7 +318,7 @@ public class AppLauncherUtils {
                         componentName,
                         info.activityInfo.loadIcon(packageManager),
                         isDistractionOptimized,
-                        contextArg -> {
+                        context -> {
                             packageManager.setApplicationEnabledSetting(packageName,
                                     PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
                             /* Fetch the current enabled setting to make sure the setting is synced
@@ -341,7 +332,7 @@ public class AppLauncherUtils {
                                                 + "]");
                             }
                             Log.i(TAG, "Successfully enabled package [" + packageName + "]");
-                            AppLauncherUtils.launchApp(contextArg, intent);
+                            AppLauncherUtils.launchApp(context, intent);
                         },
                         null);
                 launchablesMap.put(componentName, appMetaData);
@@ -495,20 +486,9 @@ public class AppLauncherUtils {
         }
     }
 
-    private static List<ResolveInfo> getDisabledActivities(Context context,
-            PackageManager packageManager, Set<String> enabledPackages) {
-        ContentResolver contentResolverForUser = context.createContextAsUser(
-                UserHandle.getUserHandleForUid(Process.myUid()), /* flags= */ 0)
-                .getContentResolver();
-        String settingsValue = Settings.Secure.getString(contentResolverForUser,
-                KEY_PACKAGES_DISABLED_ON_RESOURCE_OVERUSE);
-        Set<String> disabledPackages = TextUtils.isEmpty(settingsValue) ? Collections.emptySet()
-                : new ArraySet<>(Arrays.asList(settingsValue.split(
-                        PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR)));
-        if (disabledPackages.isEmpty()) {
-            return Collections.emptyList();
-        }
 
+    private static List<ResolveInfo> getDisabledActivities(
+            PackageManager packageManager, Set<String> enabledPackages) {
         List<ResolveInfo> allActivities = packageManager.queryIntentActivities(
                 new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER),
                 PackageManager.GET_RESOLVED_FILTER
@@ -517,9 +497,22 @@ public class AppLauncherUtils {
         List<ResolveInfo> disabledActivities = new ArrayList<>();
         for (int i = 0; i < allActivities.size(); ++i) {
             ResolveInfo info = allActivities.get(i);
-            if (!enabledPackages.contains(info.activityInfo.packageName)
-                    && disabledPackages.contains(info.activityInfo.packageName)) {
-                disabledActivities.add(info);
+            try {
+                if (!enabledPackages.contains(info.activityInfo.packageName)
+                        && packageManager.getApplicationEnabledSetting(
+                                info.activityInfo.packageName)
+                        == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                    disabledActivities.add(info);
+                }
+            } catch (RuntimeException e) {
+                if (e instanceof IllegalArgumentException) {
+                    /* Don't throw exception when the package is missing, which happens when a
+                     * package is being uninstalled and the internal datastructures are being
+                     * updated.
+                     */
+                    continue;
+                }
+                throw e;
             }
         }
         return disabledActivities;
