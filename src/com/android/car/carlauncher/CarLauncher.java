@@ -20,6 +20,8 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.car.user.CarUserManager.USER_LIFECYCLE_EVENT_TYPE_SWITCHING;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -31,7 +33,6 @@ import android.car.user.CarUserManager;
 import android.car.user.CarUserManager.UserLifecycleListener;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,13 +47,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.car.carlauncher.displayarea.CarDisplayAreaController;
+import com.android.car.carlauncher.displayarea.CarDisplayAreaOrganizer;
+import com.android.car.carlauncher.displayarea.CarFullscreenTaskListener;
 import com.android.car.carlauncher.homescreen.HomeCardModule;
-import com.android.car.carlauncher.homescreen.MapsHealthMonitor;
 import com.android.car.carlauncher.taskstack.TaskStackChangeListeners;
 import com.android.car.internal.common.UserHelperLite;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.HandlerExecutor;
+import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.startingsurface.phone.PhoneStartingWindowTypeAlgorithm;
 
 import java.util.List;
 import java.util.Set;
@@ -83,13 +89,13 @@ public class CarLauncher extends FragmentActivity {
     private boolean mTaskViewReady;
     // Tracking this to check if the task in TaskView has crashed in the background.
     private int mTaskViewTaskId = INVALID_TASK_ID;
+    private boolean mIsResumed;
+    private boolean mFocused;
     private int mCarLauncherTaskId = INVALID_TASK_ID;
     private Set<HomeCardModule> mHomeCardModules;
 
     /** Set to {@code true} once we've logged that the Activity is fully drawn. */
     private boolean mIsReadyLogged;
-
-    private boolean mUseSmallCanvasOptimizedMap;
 
     // The callback methods in {@code mTaskViewListener} are running under MainThread.
     private final TaskView.Listener mTaskViewListener = new TaskView.Listener() {
@@ -111,34 +117,24 @@ public class CarLauncher extends FragmentActivity {
         public void onTaskCreated(int taskId, ComponentName name) {
             if (DEBUG) Log.d(TAG, "onTaskCreated: taskId=" + taskId);
             mTaskViewTaskId = taskId;
-            if (isResumed()) {
-                maybeBringEmbeddedTaskToForeground();
-            }
         }
 
         @Override
         public void onTaskRemovalStarted(int taskId) {
             if (DEBUG) Log.d(TAG, "onTaskRemovalStarted: taskId=" + taskId);
             mTaskViewTaskId = INVALID_TASK_ID;
-            // Don't restart the crashed Maps automatically, because it hinders lots of MultiXXX
-            // CTS tests which cleans up all tasks but Home, then monitor Activity state
-            // changes. If it restarts Maps, which causes unexpected Activity state changes.
         }
     };
 
     private final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskFocusChanged(int taskId, boolean focused) {
-            boolean launcherFocused = taskId == mCarLauncherTaskId && focused;
+            mFocused = taskId == mCarLauncherTaskId && focused;
             if (DEBUG) {
-                Log.d(TAG, "onTaskFocusChanged: taskId=" + taskId
-                        + ", launcherFocused=" + launcherFocused
+                Log.d(TAG, "onTaskFocusChanged: mFocused=" + mFocused
                         + ", mTaskViewTaskId=" + mTaskViewTaskId);
             }
-            if (!launcherFocused) {
-                return;
-            }
-            if (mTaskViewTaskId == INVALID_TASK_ID) {
+            if (mFocused && mTaskViewTaskId == INVALID_TASK_ID) {
                 // If the task in TaskView is crashed during CarLauncher is background,
                 // We'd like to restart it when CarLauncher becomes foreground and focused.
                 startMapsInTaskView();
@@ -148,23 +144,10 @@ public class CarLauncher extends FragmentActivity {
         @Override
         public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                 boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
-            if (DEBUG) {
-                Log.d(TAG, "onActivityRestartAttempt: taskId=" + task.taskId
-                        + ", homeTaskVisible=" + homeTaskVisible + ", wasVisible=" + wasVisible);
-            }
-            if (!mUseSmallCanvasOptimizedMap
-                    && !homeTaskVisible
-                    && mTaskViewTaskId == task.taskId) {
+            if (!homeTaskVisible && mTaskViewTaskId == task.taskId) {
                 // The embedded map component received an intent, therefore forcibly bringing the
                 // launcher to the foreground.
                 bringToForeground();
-                return;
-            }
-            if (homeTaskVisible && mCarLauncherTaskId == task.taskId
-                    && mTaskViewTaskId == INVALID_TASK_ID) {
-                // Interprets Home Intent while CarLauncher is foreground and Maps is crashed
-                // as restarting Maps.
-                startMapsInTaskView();
             }
         }
     };
@@ -184,20 +167,36 @@ public class CarLauncher extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // If policy provider is defined then AppGridActivity should be launched.
+        // TODO: update this code flow. Maybe have some kind of configurable activity.
         if (CarLauncherUtils.isCustomDisplayPolicyDefined(this)) {
-            Intent controlBarIntent = new Intent(this, ControlBarActivity.class);
-            controlBarIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(controlBarIntent);
-            startActivity(
-                    CarLauncherUtils.getMapsIntent(this).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            // Register health check monitor for maps.
-            MapsHealthMonitor.getInstance(this).register();
-            finish();
+            CarLauncherApplication application = (CarLauncherApplication) getApplication();
+
+            mShellTaskOrganizer = new ShellTaskOrganizer(
+                    application.getShellExecutor(), this);
+            CarFullscreenTaskListener fullscreenTaskListener = new CarFullscreenTaskListener(
+                    this, application.getSyncTransactionQueue(),
+                    CarDisplayAreaController.getInstance());
+            mShellTaskOrganizer.addListenerForType(
+                    fullscreenTaskListener, TASK_LISTENER_TYPE_FULLSCREEN);
+            StartingWindowController startingController =
+                    new StartingWindowController(this, application.getShellExecutor(),
+                            new PhoneStartingWindowTypeAlgorithm(), new IconProvider(this),
+                            application.getTransactionPool());
+            mShellTaskOrganizer.initStartingWindow(startingController);
+            List<TaskAppearedInfo> taskAppearedInfos = mShellTaskOrganizer.registerOrganizer();
+            try {
+                cleanUpExistingTaskViewTasks(taskAppearedInfos);
+            } catch (Exception ex) {
+                Log.w(TAG, "some of the tasks couldn't be cleaned up: ", ex);
+            }
+            CarDisplayAreaController carDisplayAreaController =
+                    CarDisplayAreaController.getInstance();
+            CarDisplayAreaOrganizer org = carDisplayAreaController.getOrganizer();
+            org.startControlBarInDisplayArea();
+            org.startMapsInBackGroundDisplayArea();
             return;
         }
-
-        mUseSmallCanvasOptimizedMap =
-                CarLauncherUtils.isSmallCanvasOptimizedMapIntentConfigured(this);
 
         Car.createCar(getApplicationContext(), /* handler= */ null,
                 Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
@@ -261,22 +260,24 @@ public class CarLauncher extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mIsResumed = true;
         maybeLogReady();
         if (DEBUG) {
-            Log.d(TAG, "onResume: mTaskViewTaskId=" + mTaskViewTaskId);
+            Log.d(TAG, "onResume: mFocused=" + mFocused + ", mTaskViewTaskId=" + mTaskViewTaskId);
+        }
+        if (!mTaskViewReady) return;
+        if (mTaskViewTaskId != INVALID_TASK_ID) {
+            // The task in TaskView should be in top to make it visible.
+            // NOTE: Tried setTaskAlwaysOnTop before, the flag has some side effect to hinder
+            // AccessibilityService from finding the correct window geometry: b/197247311
+            mActivityManager.moveTaskToFront(mTaskViewTaskId, /* flags= */ 0);
         }
     }
 
     @Override
-    public void onTopResumedActivityChanged(boolean isTopResumed) {
-        super.onTopResumedActivityChanged(isTopResumed);
-        if (DEBUG) {
-            Log.d(TAG, "onTopResumedActivityChanged: isTopResumed=" + isTopResumed);
-        }
-        if (!isTopResumed) {
-            return;
-        }
-        maybeBringEmbeddedTaskToForeground();
+    protected void onPause() {
+        super.onPause();
+        mIsResumed = false;
     }
 
     @Override
@@ -287,6 +288,9 @@ public class CarLauncher extends FragmentActivity {
     }
 
     private void release() {
+        if (mShellTaskOrganizer != null) {
+            mShellTaskOrganizer.unregisterOrganizer();
+        }
         if (mTaskView != null && mTaskViewReady) {
             mTaskView.release();
             mTaskView = null;
@@ -312,12 +316,9 @@ public class CarLauncher extends FragmentActivity {
         try {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(this,
                     /* enterResId= */ 0, /* exitResId= */ 0);
-            Intent mapIntent = mUseSmallCanvasOptimizedMap
-                    ? CarLauncherUtils.getSmallCanvasOptimizedMapIntent(this)
-                    : CarLauncherUtils.getMapsIntent(this);
             mTaskView.startActivity(
                     PendingIntent.getActivity(this, /* requestCode= */ 0,
-                            mapIntent,
+                            CarLauncherUtils.getMapsIntent(this),
                             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT),
                     /* fillInIntent= */ null, options, null /* launchBounds */);
         } catch (ActivityNotFoundException e) {
@@ -365,12 +366,11 @@ public class CarLauncher extends FragmentActivity {
 
     /** Logs that the Activity is ready. Used for startup time diagnostics. */
     private void maybeLogReady() {
-        boolean isResumed = isResumed();
         if (DEBUG) {
             Log.d(TAG, "maybeLogReady(" + getUserId() + "): activityReady=" + mTaskViewReady
-                    + ", started=" + isResumed + ", alreadyLogged: " + mIsReadyLogged);
+                    + ", started=" + mIsResumed + ", alreadyLogged: " + mIsReadyLogged);
         }
-        if (mTaskViewReady && isResumed) {
+        if (mTaskViewReady && mIsResumed) {
             // We should report every time - the Android framework will take care of logging just
             // when it's effectively drawn for the first time, but....
             reportFullyDrawn();
@@ -381,16 +381,6 @@ public class CarLauncher extends FragmentActivity {
                 Log.i(TAG, "Launcher for user " + getUserId() + " is ready");
                 mIsReadyLogged = true;
             }
-        }
-    }
-
-    /** Brings embedded task to front, if the task view is created and the task is launched. */
-    private void maybeBringEmbeddedTaskToForeground() {
-        if (mTaskViewTaskId != INVALID_TASK_ID) {
-            // The task in TaskView should be in top to make it visible.
-            // NOTE: Tried setTaskAlwaysOnTop before, the flag has some side effect to hinder
-            // AccessibilityService from finding the correct window geometry: b/197247311
-            mActivityManager.moveTaskToFront(mTaskViewTaskId, /* flags= */ 0);
         }
     }
 
