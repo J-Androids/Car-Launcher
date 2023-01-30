@@ -261,7 +261,15 @@ public class AppLauncherUtils {
                                         carMediaManager);
                             }
                         },
-                        /* alternateLaunchCallback */ null);
+                        contextArg -> {
+                            // getLaunchIntentForPackage looks for a main activity in the category
+                            // Intent.CATEGORY_INFO, then Intent.CATEGORY_LAUNCHER, and returns null
+                            // if neither are found
+                            Intent packageLaunchIntent =
+                                    packageManager.getLaunchIntentForPackage(packageName);
+                            AppLauncherUtils.launchApp(contextArg,
+                                    packageLaunchIntent != null ? packageLaunchIntent : intent);
+                        });
                     launchablesMap.put(componentName, appMetaData);
                 }
             }
@@ -290,7 +298,7 @@ public class AppLauncherUtils {
                         info.getBadgedIcon(0),
                         isDistractionOptimized,
                         contextArg -> AppLauncherUtils.launchApp(contextArg, intent),
-                        /* alternateLaunchCallback */ null);
+                        null);
                     launchablesMap.put(componentName, appMetaData);
                 }
             }
@@ -334,7 +342,7 @@ public class AppLauncherUtils {
                             Log.i(TAG, "Successfully enabled package [" + packageName + "]");
                             AppLauncherUtils.launchApp(contextArg, intent);
                         },
-                        /* alternateLaunchCallback */ null);
+                        null);
                 launchablesMap.put(componentName, appMetaData);
             }
         }
