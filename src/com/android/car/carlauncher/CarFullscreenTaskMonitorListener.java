@@ -32,11 +32,13 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CarFullscreenTaskMonitorListener extends FullscreenTaskListener {
     private static final String TAG = CarFullscreenTaskMonitorListener.class.getSimpleName();
     private final AtomicReference<CarActivityManager> mCarActivityManagerRef;
+    private SyncTransactionQueue mSyncQueue;
 
     public CarFullscreenTaskMonitorListener(
             AtomicReference<CarActivityManager> carActivityManagerRef,
             SyncTransactionQueue syncQueue) {
         super(syncQueue);
+        mSyncQueue = syncQueue;
         mCarActivityManagerRef = carActivityManagerRef;
     }
     @Override
@@ -49,6 +51,7 @@ public class CarFullscreenTaskMonitorListener extends FullscreenTaskListener {
         } else {
             Log.w(TAG, "CarActivityManager is null, skip onTaskAppeared: taskInfo=" + taskInfo);
         }
+        mSyncQueue.runInSync(t -> t.show(leash));
     }
 
     @Override
