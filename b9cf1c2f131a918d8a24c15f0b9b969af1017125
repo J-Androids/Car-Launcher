@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7cc74f2a_f0534261",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1011530
+      },
+      "writtenOn": "2023-12-05T06:30:30Z",
+      "side": 1,
+      "message": "The bug looks incorrect.",
+      "revId": "b9cf1c2f131a918d8a24c15f0b9b969af1017125",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "62ba2890_0bc814ac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011530
+      },
+      "writtenOn": "2023-12-05T06:30:30Z",
+      "side": 1,
+      "message": "I think we fixed this issue with \nhttps://cs.android.com/android/_/android/platform/frameworks/base/+/7e21e56840e2efd222820edb279db1eaf2139976\n\nCould you check if you have the commit?",
+      "revId": "b9cf1c2f131a918d8a24c15f0b9b969af1017125",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
