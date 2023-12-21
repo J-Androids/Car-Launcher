@@ -33,6 +33,24 @@
       "message": "I think we fixed this issue with \nhttps://cs.android.com/android/_/android/platform/frameworks/base/+/7e21e56840e2efd222820edb279db1eaf2139976\n\nCould you check if you have the commit?",
       "revId": "b9cf1c2f131a918d8a24c15f0b9b969af1017125",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3234b2fc_e5343009",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3238976
+      },
+      "writtenOn": "2023-12-21T06:14:40Z",
+      "side": 1,
+      "message": "Already verified,Could you share the aosp gerrit of this fix?\nNeed he branch details.Tks!",
+      "parentUuid": "62ba2890_0bc814ac",
+      "revId": "b9cf1c2f131a918d8a24c15f0b9b969af1017125",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
