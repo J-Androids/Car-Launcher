@@ -30,7 +30,7 @@ android_library {
 
     static_libs: [
         "androidx.recyclerview_recyclerview",
-        "androidx.core_core-animation-nodeps",
+        "androidx.core_core-animation",
         "car-ui-lib-no-overlayable",
         "androidx.lifecycle_lifecycle-extensions",
         "com.google.android.material_material",
