@@ -24,8 +24,6 @@
         <!-- This is used in AppLauncherUtilTests -->
         <meta-data android:name="com.android.automotive"
             android:resource="@xml/automotive_app_desc"/>
-
-        <activity android:name="com.android.car.carlauncher.TaskViewManagerTest$TestActivity" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
