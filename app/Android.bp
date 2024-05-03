@@ -95,7 +95,6 @@ android_app {
 aconfig_declarations {
     name: "car_launcher_flags",
     package: "com.android.car.carlauncher",
-    container: "system",
     srcs: ["car_launcher_flags.aconfig"],
 }
 
