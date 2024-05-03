@@ -1,5 +1,4 @@
 package: "com.android.car.carlauncher"
-container: "system"
 
 flag {
   name: "calm_mode"
