@@ -16,10 +16,12 @@
 
 package com.android.car.docklib.data
 
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.docklib.TestUtils
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -29,32 +31,36 @@ import org.mockito.kotlin.whenever
 class DockAppItemTest {
     @Test
     fun compareAppItems_equal() {
-        val item1: DockAppItem = TestUtils.createAppItem()
-        val item2: DockAppItem = TestUtils.createAppItem()
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id)
 
         assertThat(item1).isEqualTo(item2)
     }
 
     @Test
     fun compareAppItems_notEqual_differentApps() {
-        val item1: DockAppItem = TestUtils.createAppItem(app = "1")
-        val item2: DockAppItem = TestUtils.createAppItem(app = "2")
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, app = "1")
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, app = "2")
 
         assertThat(item1).isNotEqualTo(item2)
     }
 
     @Test
     fun compareAppItems_notEqual_differentNames() {
-        val item1: DockAppItem = TestUtils.createAppItem(name = "1")
-        val item2: DockAppItem = TestUtils.createAppItem(name = "2")
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, name = "1")
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, name = "2")
 
         assertThat(item1).isNotEqualTo(item2)
     }
 
     @Test
     fun compareAppItems_notEqual_differentStates() {
-        val item1: DockAppItem = TestUtils.createAppItem(type = DockAppItem.Type.DYNAMIC)
-        val item2: DockAppItem = TestUtils.createAppItem(type = DockAppItem.Type.STATIC)
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, type = DockAppItem.Type.DYNAMIC)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, type = DockAppItem.Type.STATIC)
 
         assertThat(item1).isNotEqualTo(item2)
     }
@@ -65,17 +71,63 @@ class DockAppItemTest {
         whenever(icon1.constantState).thenReturn(null)
         val icon2 = mock<Drawable>()
         whenever(icon2.constantState).thenReturn(mock<Drawable.ConstantState>())
-
-        val item1: DockAppItem = TestUtils.createAppItem(icon = icon1)
-        val item2: DockAppItem = TestUtils.createAppItem(icon = icon2)
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, icon = icon1)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, icon = icon2)
 
         assertThat(item1).isNotEqualTo(item2)
     }
 
     @Test
     fun compareAppItems_notEqual_differentDrivingOptimized() {
-        val item1: DockAppItem = TestUtils.createAppItem(isDrivingOptimized = true)
-        val item2: DockAppItem = TestUtils.createAppItem(isDrivingOptimized = false)
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, isDrivingOptimized = true)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, isDrivingOptimized = false)
+
+        assertThat(item1).isNotEqualTo(item2)
+    }
+
+    @Test
+    fun compareAppItems_notEqual_differentMediaType() {
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, isMediaApp = true)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, isMediaApp = false)
+
+        assertThat(item1).isNotEqualTo(item2)
+    }
+
+    @Test
+    fun compareAppItems_notEqual_differentIconColor() {
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(id = id, iconColor = Color.WHITE)
+        val item2: DockAppItem = TestUtils.createAppItem(id = id, iconColor = Color.BLACK)
+
+        assertThat(item1).isNotEqualTo(item2)
+    }
+
+    @Test
+    fun compareAppItems_notEqual_differentIconColorScrim() {
+        val id = UUID.randomUUID()
+        val item1: DockAppItem = TestUtils.createAppItem(
+                id = id,
+                iconColor = Color.WHITE,
+                iconColorScrim = Color.argb(
+                        100, // alpha
+                        255, // red
+                        0, // green
+                        0 // blue
+                )
+        )
+        val item2: DockAppItem = TestUtils.createAppItem(
+                id = id,
+                iconColor = Color.WHITE,
+                iconColorScrim = Color.argb(
+                        150, // alpha
+                        0, // red
+                        255, // green
+                        0 // blue
+                )
+        )
 
         assertThat(item1).isNotEqualTo(item2)
     }

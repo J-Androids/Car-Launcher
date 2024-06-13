@@ -62,12 +62,6 @@
     </string-array>
 
     <!--
-        Determines whether or not to use the RemoteCarTaskView from car-lib instead of the
-        CarTaskView that exists inside the CarLauncher.
-    -->
-    <bool name="config_useRemoteCarTaskView">true</bool>
-
-    <!--
         The Activity to use as a passenger Launcher, if empty, it assumes CarLauncher can do
         the passenger Launcher role too.
     -->
@@ -84,7 +78,6 @@
     <bool name="config_calmMode_showNavigation">true</bool>
     <bool name="config_calmMode_showDate">true</bool>
     <bool name="config_calmMode_showTemperature">true</bool>
-    <string name="config_calmMode_packageName">com.android.car.carlauncher</string>
-    <string name="config_calmMode_activityName">com.android.car.carlauncher.calmmode.CalmModeActivity</string>
+    <string name="config_calmMode_componentName">com.android.car.carlauncher/com.android.car.carlauncher.calmmode.CalmModeActivity</string>
 
 </resources>

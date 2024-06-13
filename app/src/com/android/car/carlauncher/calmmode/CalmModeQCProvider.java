@@ -16,7 +16,9 @@
 
 package com.android.car.carlauncher.calmmode;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import com.android.car.qc.QCRow;
 import com.android.car.qc.provider.BaseQCProvider;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Remote Quick Control provider for Calm mode in CarLauncher.
@@ -53,6 +56,7 @@ public class CalmModeQCProvider extends BaseQCProvider {
             .build();
     private Set<String> mAllowListedPackages;
     private Context mContext;
+    private AtomicInteger mPendingIntentRequestCode = new AtomicInteger(0);
     @VisibleForTesting
     QCItem mQCItem;
 
@@ -103,17 +107,22 @@ public class CalmModeQCProvider extends BaseQCProvider {
     @VisibleForTesting
     QCItem getQCItem() {
         Resources resources = mContext.getResources();
-        String packageName = resources.getString(R.string.config_calmMode_packageName);
-        String activityName = resources.getString(R.string.config_calmMode_activityName);
-
+        ComponentName componentName = ComponentName.unflattenFromString(
+                resources.getString(R.string.config_calmMode_componentName));
         Intent intent = new Intent();
-        intent.setClassName(packageName, activityName);
-        PendingIntent ambientModeIntent = PendingIntent.getActivity(mContext, 0, intent,
-                PendingIntent.FLAG_IMMUTABLE);
+        intent.setComponent(componentName);
+        intent.putExtra(CalmModeStatsLogHelper.INTENT_EXTRA_CALM_MODE_LAUNCH_TYPE,
+                CalmModeStatsLogHelper.CalmModeLaunchType.QUICK_CONTROLS);
+        ActivityOptions activityOptions = ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        PendingIntent calmModeIntent = PendingIntent.getActivity(mContext,
+                mPendingIntentRequestCode.getAndAdd(1), intent,
+                PendingIntent.FLAG_IMMUTABLE, activityOptions.toBundle());
 
         QCRow calmModeRow = new QCRow.Builder()
                 .setTitle(mContext.getString(R.string.calm_mode_title))
-                .setPrimaryAction(ambientModeIntent)
+                .setPrimaryAction(calmModeIntent)
                 .build();
 
         return new QCList.Builder().addRow(calmModeRow).build();

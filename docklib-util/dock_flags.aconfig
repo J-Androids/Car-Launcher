@@ -1,0 +1,9 @@
+package: "com.android.car.dockutil"
+container: "system"
+
+flag {
+  name: "dock_feature"
+  namespace: "car_sys_exp"
+  description: "This flag enables dock in Car"
+  bug: "301482374"
+}

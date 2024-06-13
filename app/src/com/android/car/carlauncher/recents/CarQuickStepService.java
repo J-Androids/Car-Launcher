@@ -27,7 +27,6 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.SurfaceControl;
 
 import androidx.annotation.Nullable;
 
@@ -166,12 +165,12 @@ public class CarQuickStepService extends Service {
         }
 
         @Override
-        public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        public void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
             // no-op
         }
 
         @Override
-        public void onNavigationBarSurface(SurfaceControl surface) {
+        public void enterStageSplitFromRunningApp(boolean leftOrTop) {
             // no-op
         }
 

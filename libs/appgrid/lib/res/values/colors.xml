@@ -17,7 +17,6 @@
 <resources>
     <color name="icon_tint">#FFF8F9FA</color>
     <color name="recent_apps_line_divider_color">#1FFFFFFF</color>
-    <color name="shortcuts_icon_color">#FFFFFFFF</color>
     <color name="page_indicator_bar_color">#FF66B5FF</color>
     <color name="app_item_on_hover_border_color">#FF66B5FF</color>
     <color name="app_item_on_hover_background_color">#3D66B5FF</color>
