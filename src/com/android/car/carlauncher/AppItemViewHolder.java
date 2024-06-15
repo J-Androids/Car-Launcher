@@ -18,6 +18,7 @@ package com.android.car.carlauncher;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,15 +66,11 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
 
         if (isLaunchable) {
             mAppItem.setOnClickListener(v -> app.getLaunchCallback().accept(mContext));
-            boolean hasLongClickCallback = (app.getAlternateLaunchCallback() != null);
-            mAppItem.setLongClickable(hasLongClickCallback);
-            if (hasLongClickCallback) {
-                // Note setOnLongClickListener implicitly sets view to be long clickable
-                mAppItem.setOnLongClickListener(v -> {
-                    app.getAlternateLaunchCallback().accept(mContext);
-                    return true;
-                });
-            }
+            mAppItem.setLongClickable(app.getAlternateLaunchCallback() != null);
+            mAppItem.setOnLongClickListener(v-> {
+                app.getAlternateLaunchCallback().accept(mContext);
+                return true;
+            });
         } else {
             String warningText = mContext.getResources()
                     .getString(R.string.driving_toast_text, app.getDisplayName());
