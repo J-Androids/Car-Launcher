@@ -24,10 +24,9 @@ import static com.android.car.carlauncher.AppGridConstants.AppItemBoundDirection
 import static com.android.car.carlauncher.AppGridConstants.PageOrientation;
 import static com.android.car.carlauncher.AppLauncherUtils.APP_TYPE_LAUNCHABLES;
 import static com.android.car.carlauncher.AppLauncherUtils.APP_TYPE_MEDIA_SERVICES;
-import static com.android.car.carlauncher.hidden.HiddenApiAccess.getDragSurface;
+import static com.android.car.hidden.apis.HiddenApiAccess.getDragSurface;
 
 import android.animation.ValueAnimator;
-import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.car.Car;
@@ -52,6 +51,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -59,9 +59,9 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -70,6 +70,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.carlauncher.AppLauncherUtils.LauncherAppsInfo;
@@ -79,7 +80,6 @@ import com.android.car.carlauncher.recyclerview.AppGridAdapter;
 import com.android.car.carlauncher.recyclerview.AppGridItemAnimator;
 import com.android.car.carlauncher.recyclerview.AppGridLayoutManager;
 import com.android.car.carlauncher.recyclerview.AppItemViewHolder;
-import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
@@ -90,6 +90,7 @@ import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -99,6 +100,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Launcher activity that shows a grid of apps.
@@ -109,6 +111,8 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
     private static final String TAG = "AppGridActivity";
     private static final boolean DEBUG_BUILD = false;
     private static final String MODE_INTENT_EXTRA = "com.android.car.carlauncher.mode";
+    @VisibleForTesting
+    static final String TOS_BANNER_DISMISS_TIME_KEY = "TOS_BANNER_DISMISS_TIME";
     private static CarUiShortcutsPopup sCarUiShortcutsPopup;
 
     private boolean mShowAllApps = true;
@@ -122,7 +126,6 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
     private CarPackageManager mCarPackageManager;
     private CarMediaManager mCarMediaManager;
     private Mode mMode;
-    private AlertDialog mStopAppAlertDialog;
     private LauncherAppsInfo mAppsInfo;
     private LauncherViewModel mLauncherModel;
     private AppGridAdapter mAdapter;
@@ -148,7 +151,6 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
     private int mCurrentScrollOffset;
     private int mCurrentScrollState;
     private int mNextScrollDestination;
-    private RecyclerView.ItemDecoration mPageMarginDecorator;
     private AppGridPageSnapper.AppGridPageSnapCallback mSnapCallback;
     private AppItemViewHolder.AppItemDragCallback mDragCallback;
 
@@ -156,10 +158,12 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
     private Messenger mMessenger;
     private String mMirroringPackageName;
     private Intent mMirroringIntentRedirect;
+    private Clock mClock;
     @VisibleForTesting
     ContentObserver mTosContentObserver;
     @VisibleForTesting
     ContentObserver mTosDisabledAppsContentObserver;
+    private BackgroundAnimationHelper mBackgroundAnimationHelper;
 
     /**
      * enum to define the state of display area possible.
@@ -245,7 +249,7 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
                 mLayoutManager.setShouldLayoutChildren(true);
                 mRecyclerView.cancelDragAndDrop();
             }
-            dismissForceStopMenus();
+            dismissShortcutPopup();
         }
     }
 
@@ -307,6 +311,7 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
         );
         mCar = Car.createCar(this, mCarConnectionListener);
         mHiddenApps.addAll(Arrays.asList(getResources().getStringArray(R.array.hidden_apps)));
+        mClock = Clock.systemUTC();
         setContentView(R.layout.app_grid_activity);
         updateMode();
 
@@ -443,7 +448,10 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
         mPaginationController = new PaginationController(windowBackground, dimensionUpdateCallback);
 
         mBanner = requireViewById(R.id.tos_banner);
-        updateTosBanner();
+
+        mBackgroundAnimationHelper = new BackgroundAnimationHelper(windowBackground, mBanner);
+
+        setupTosBanner();
 
         setupContentObserversForTos();
     }
@@ -589,7 +597,11 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
 
     @Override
     protected void onPause() {
-        dismissForceStopMenus();
+        dismissShortcutPopup();
+        // Required as banner needs to be animated when activity is resumed
+        if (showTosBanner(/* context = */ this)) {
+            mBackgroundAnimationHelper.hideBanner();
+        }
         super.onPause();
     }
 
@@ -718,47 +730,12 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
         sCarUiShortcutsPopup = carUiShortcutsPopup;
     }
 
-    @Override
-    public void onShortcutsItemClick(String packageName, CharSequence displayName,
-            boolean allowStopApp) {
-        AlertDialogBuilder builder = new AlertDialogBuilder(this)
-                .setTitle(R.string.app_launcher_stop_app_dialog_title);
-
-        if (allowStopApp) {
-            builder.setMessage(R.string.app_launcher_stop_app_dialog_text)
-                    .setPositiveButton(android.R.string.ok,
-                            (d, w) -> AppLauncherUtils.forceStop(packageName, AppGridActivity.this,
-                                    displayName, mCarMediaManager, mAppsInfo.getMediaServices(),
-                                    this))
-                    .setNegativeButton(android.R.string.cancel, /* onClickListener= */ null);
-        } else {
-            builder.setMessage(R.string.app_launcher_stop_app_cant_stop_text)
-                    .setNeutralButton(android.R.string.ok, /* onClickListener= */ null);
-        }
-        mStopAppAlertDialog = builder.show();
-    }
-
-    @Override
-    public void onStopAppSuccess(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
     private void dismissShortcutPopup() {
         // TODO (b/268563442): shortcut popup is set to be static since its
         // sometimes recreated when taskview is present, find out why
         if (sCarUiShortcutsPopup != null) {
             sCarUiShortcutsPopup.dismiss();
             sCarUiShortcutsPopup = null;
-        }
-    }
-
-    private void dismissForceStopMenus() {
-        if (sCarUiShortcutsPopup != null) {
-            sCarUiShortcutsPopup.dismissImmediate();
-            sCarUiShortcutsPopup = null;
-        }
-        if (mStopAppAlertDialog != null) {
-            mStopAppAlertDialog.dismiss();
         }
     }
 
@@ -904,21 +881,31 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
         delayedDismissAnimator.start();
     }
 
-    private void updateTosBanner() {
+    private void setupTosBanner() {
+        if (AppLauncherUtils.tosAccepted(/* context = */ this)) {
+            return;
+        }
+        mBanner.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                updateTosBannerVisibility();
+                mBanner.getViewTreeObserver().removeOnGlobalLayoutListener(/* victim = */ this);
+            }
+        });
         mBanner.setFirstButtonOnClickListener(v -> {
             Intent tosIntent = AppLauncherUtils.getIntentForTosAcceptanceFlow(v.getContext());
             AppLauncherUtils.launchApp(v.getContext(), tosIntent);
         });
         mBanner.setSecondButtonOnClickListener(
-                v -> mBanner.setVisibility(View.GONE));
+                v -> {
+                    mBackgroundAnimationHelper.hideBanner();
+                    saveTosBannerDismissalTime();
+                });
     }
 
     private void updateTosBannerVisibility() {
-
-        if (AppLauncherUtils.showTosBanner(this)) {
-            runOnUiThread(() -> {
-                mBanner.setVisibility(View.VISIBLE);
-            });
+        if (showTosBanner(/* context = */ this)) {
+            mBackgroundAnimationHelper.showBanner();
         } else {
             mBanner.setVisibility(View.GONE);
         }
@@ -974,6 +961,38 @@ public class AppGridActivity extends AppCompatActivity implements InsetsChangedL
             getContentResolver().unregisterContentObserver(mTosDisabledAppsContentObserver);
             mTosDisabledAppsContentObserver = null;
         }
+    }
+
+    @VisibleForTesting
+    boolean showTosBanner(Context context) {
+        if (AppLauncherUtils.tosAccepted(context)) {
+            return false;
+        }
+        // Convert days to seconds
+        long bannerResurfaceTimeInSeconds = TimeUnit.DAYS.toSeconds(context.getResources()
+                .getInteger(R.integer.config_tos_banner_resurface_time_days));
+        long bannerDismissTime = PreferenceManager.getDefaultSharedPreferences(context)
+                .getLong(TOS_BANNER_DISMISS_TIME_KEY, /* defValue = */ 0);
+
+        // Show on next drive / reboot, when banner has not been dismissed in current session
+        if (bannerResurfaceTimeInSeconds == 0) {
+            // If banner is dismissed in current drive session, it will have a timestamp greater
+            // than the system boot time timestamp.
+            return bannerDismissTime < getSystemBootTime();
+        }
+        return mClock.instant().getEpochSecond() - bannerDismissTime > bannerResurfaceTimeInSeconds;
+    }
+
+    private void saveTosBannerDismissalTime() {
+        long dismissTime = mClock.instant().getEpochSecond();
+        PreferenceManager.getDefaultSharedPreferences(/* context = */ this)
+                .edit().putLong(TOS_BANNER_DISMISS_TIME_KEY, dismissTime).apply();
+    }
+
+    @VisibleForTesting
+    long getSystemBootTime() {
+        long uptimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(SystemClock.elapsedRealtime());
+        return mClock.instant().getEpochSecond() - uptimeInSeconds;
     }
 
     @VisibleForTesting

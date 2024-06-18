@@ -17,21 +17,32 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-
 android_library {
     name: "CarDockUtilLib",
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+        ":hidden_api_enabled_srcs",
     ],
 
     resource_dirs: ["res"],
 
     static_libs: [
+        "dock_flags_java_lib",
         "androidx.lifecycle_lifecycle-extensions",
-        "com.google.android.material_material",
-        "car-ui-lib",
     ],
 
     manifest: "AndroidManifest.xml",
+}
+
+aconfig_declarations {
+    name: "dock_flags",
+    package: "com.android.car.dockutil",
+    container: "system",
+    srcs: ["dock_flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "dock_flags_java_lib",
+    aconfig_declarations: "dock_flags",
 }
