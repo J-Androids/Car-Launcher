@@ -26,7 +26,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackListener;
 import android.car.Car;
-import android.car.user.CarUserManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -46,6 +45,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.car.carlauncher.homescreen.HomeCardModule;
+import com.android.car.carlauncher.homescreen.audio.IntentHandler;
+import com.android.car.carlauncher.homescreen.audio.media.MediaIntentRouter;
 import com.android.car.carlauncher.taskstack.TaskStackChangeListeners;
 import com.android.car.internal.common.UserHelperLite;
 import com.android.wm.shell.taskview.TaskView;
@@ -72,17 +73,13 @@ public class CarLauncher extends FragmentActivity {
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private ActivityManager mActivityManager;
-    private TaskViewManager mTaskViewManager;
-
     private Car mCar;
-    private CarTaskView mTaskView;
     private int mCarLauncherTaskId = INVALID_TASK_ID;
     private Set<HomeCardModule> mHomeCardModules;
 
     /** Set to {@code true} once we've logged that the Activity is fully drawn. */
     private boolean mIsReadyLogged;
     private boolean mUseSmallCanvasOptimizedMap;
-    private boolean mUseRemoteCarTaskView;
     private ViewGroup mMapsCard;
     private CarLauncherViewModel mCarLauncherViewModel;
 
@@ -107,20 +104,20 @@ public class CarLauncher extends FragmentActivity {
                 // The embedded map component received an intent, therefore forcibly bringing the
                 // launcher to the foreground.
                 bringToForeground();
-                return;
             }
         }
     };
 
-    @VisibleForTesting
-    void setCarUserManager(CarUserManager carUserManager) {
-        if (mTaskViewManager == null) {
-            Log.w(TAG, "Task view manager is null, cannot set CarUserManager on taskview "
-                    + "manager");
-            return;
+    private final IntentHandler mMediaIntentHandler = new IntentHandler() {
+        @Override
+        public void handleIntent(Intent intent) {
+            if (intent != null) {
+                ActivityOptions options = ActivityOptions.makeBasic();
+                options.setLaunchDisplayId(getDisplay().getDisplayId());
+                startActivity(intent, options.toBundle());
+            }
         }
-        mTaskViewManager.setCarUserManager(carUserManager);
-    }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +166,6 @@ public class CarLauncher extends FragmentActivity {
 
         mUseSmallCanvasOptimizedMap =
                 CarLauncherUtils.isSmallCanvasOptimizedMapIntentConfigured(this);
-        mUseRemoteCarTaskView = getResources().getBoolean(R.bool.config_useRemoteCarTaskView);
 
         mActivityManager = getSystemService(ActivityManager.class);
         mCarLauncherTaskId = getTaskId();
@@ -191,14 +187,11 @@ public class CarLauncher extends FragmentActivity {
             if (!UserHelperLite.isHeadlessSystemUser(getUserId())) {
                 mMapsCard = findViewById(R.id.maps_card);
                 if (mMapsCard != null) {
-                    if (mUseRemoteCarTaskView) {
-                        setupRemoteCarTaskView(mMapsCard);
-                    } else {
-                        setUpTaskView(mMapsCard);
-                    }
+                    setupRemoteCarTaskView(mMapsCard);
                 }
             }
         }
+        MediaIntentRouter.getInstance().registerMediaIntentHandler(mMediaIntentHandler);
         initializeCards();
         setupContentObserversForTos();
     }
@@ -215,48 +208,6 @@ public class CarLauncher extends FragmentActivity {
                 parent.addView(taskView);
             }
         });
-    }
-
-    private void setUpTaskView(ViewGroup parent) {
-        Set<String> taskViewPackages = new ArraySet<>(getResources().getStringArray(
-                R.array.config_taskViewPackages));
-        mTaskViewManager = new TaskViewManager(this, getMainThreadHandler());
-
-        mTaskViewManager.createControlledCarTaskView(
-                getMainExecutor(),
-                ControlledCarTaskViewConfig.builder()
-                        .setActivityIntent(getMapsIntent())
-                        // TODO(b/263876526): Enable auto restart after ensuring no CTS failure.
-                        .setAutoRestartOnCrash(false)
-                        .build(),
-                new ControlledCarTaskViewCallbacks() {
-                    @Override
-                    public void onTaskViewCreated(CarTaskView taskView) {
-                        parent.addView(taskView);
-                        mTaskView = taskView;
-                    }
-
-                    @Override
-                    public void onTaskViewReady() {
-                        maybeLogReady();
-                    }
-
-                    @Override
-                    public Set<String> getDependingPackageNames() {
-                        return taskViewPackages;
-                    }
-                });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // The TaskViewManager might have been released if the user was switched to some other user
-        // and then switched back to the previous user before the previous user is stopped.
-        // In such a case, the TaskViewManager should be recreated.
-        if (!mUseRemoteCarTaskView && mMapsCard != null && mTaskViewManager.isReleased()) {
-            setUpTaskView(mMapsCard);
-        }
     }
 
     @Override
@@ -278,9 +229,6 @@ public class CarLauncher extends FragmentActivity {
     }
 
     private int getTaskViewTaskId() {
-        if (mTaskView != null) {
-            return mTaskView.getTaskId();
-        }
         if (mCarLauncherViewModel != null) {
             return mCarLauncherViewModel.getRemoteCarTaskViewTaskId();
         }
@@ -288,7 +236,6 @@ public class CarLauncher extends FragmentActivity {
     }
 
     private void release() {
-        mTaskView = null;
         // When using a ViewModel for the RemoteCarTaskViews, the task view can still be attached
         // to the mMapsCard due to which the CarLauncher activity does not get garbage collected
         // during activity recreation.
@@ -337,13 +284,7 @@ public class CarLauncher extends FragmentActivity {
     /** Logs that the Activity is ready. Used for startup time diagnostics. */
     private void maybeLogReady() {
         boolean isResumed = isResumed();
-        boolean taskViewInitialized = mTaskView != null && mTaskView.isInitialized();
-        if (DEBUG) {
-            Log.d(TAG, "maybeLogReady(" + getUserId() + "): mapsReady="
-                    + taskViewInitialized + ", started=" + isResumed + ", alreadyLogged: "
-                    + mIsReadyLogged);
-        }
-        if (taskViewInitialized && isResumed) {
+        if (isResumed) {
             // We should report every time - the Android framework will take care of logging just
             // when it's effectively drawn for the first time, but....
             reportFullyDrawn();

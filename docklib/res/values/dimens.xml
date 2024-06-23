@@ -21,8 +21,12 @@
     <dimen name="dock_item_size">72dp</dimen>
     <dimen name="dock_item_spacing">2dp</dimen>
 
-    <dimen name="static_icon_stroke_width">0dp</dimen>
-    <dimen name="dynamic_icon_stroke_width">6dp</dimen>
-    <dimen name="icon_stroke_width_excited">30dp</dimen>
+    <dimen name="icon_stroke_width_static">0dp</dimen>
+    <dimen name="icon_stroke_width_dynamic">6dp</dimen>
+    <dimen name="icon_stroke_width_excited">20dp</dimen>
 
+    <item name="icon_colorFilter_alpha_excited" format="float" type="dimen">0.3</item>
+
+    <!-- Width to scale down the drop animation before scaling it back to required size  -->
+    <dimen name="drop_animation_scale_down_width">6dp</dimen>
 </resources>

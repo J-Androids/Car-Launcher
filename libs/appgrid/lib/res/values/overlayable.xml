@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Copyright (C) 2023 The Android Open Source Project
+<!-- Copyright (C) 2024 The Android Open Source Project
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -34,7 +34,6 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="color" name="icon_tint"/>
       <item type="color" name="page_indicator_bar_color"/>
       <item type="color" name="recent_apps_line_divider_color"/>
-      <item type="color" name="shortcuts_icon_color"/>
       <item type="dimen" name="app_bar_height"/>
       <item type="dimen" name="app_grid_header_margin"/>
       <item type="dimen" name="app_grid_height"/>
@@ -75,29 +74,29 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="dimen" name="threshold_to_start_drag_drop"/>
       <item type="drawable" name="app_item_highlight"/>
       <item type="drawable" name="banner_warning_image"/>
-      <item type="drawable" name="ic_app_info"/>
-      <item type="drawable" name="ic_force_stop_caution_icon"/>
       <item type="drawable" name="page_indicator_bar"/>
       <item type="id" name="app_icon"/>
       <item type="id" name="app_item"/>
       <item type="id" name="app_name"/>
       <item type="id" name="apps_grid"/>
       <item type="id" name="apps_grid_background"/>
+      <item type="id" name="apps_grid_background_container"/>
+      <item type="id" name="banner_first_button"/>
+      <item type="id" name="banner_icon"/>
+      <item type="id" name="banner_second_button"/>
       <item type="id" name="banner_title"/>
       <item type="id" name="divider"/>
-      <item type="id" name="first_button"/>
       <item type="id" name="focus_area"/>
-      <item type="id" name="icon"/>
       <item type="id" name="page_indicator"/>
       <item type="id" name="page_indicator_container"/>
       <item type="id" name="recent_apps_row"/>
-      <item type="id" name="second_button"/>
       <item type="id" name="tos_banner"/>
       <item type="integer" name="car_app_selector_column_number"/>
       <item type="integer" name="car_app_selector_row_number"/>
       <item type="integer" name="config_msg_register_mirroring_pkg_code"/>
       <item type="integer" name="config_msg_send_mirroring_pkg_code"/>
       <item type="integer" name="config_msg_unregister_mirroring_pkg_code"/>
+      <item type="integer" name="config_tos_banner_resurface_time_days"/>
       <item type="integer" name="ms_background_highlight_duration"/>
       <item type="integer" name="ms_drop_animation_delay"/>
       <item type="integer" name="ms_long_press_animation_duration"/>
@@ -111,12 +110,7 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="layout" name="app_item"/>
       <item type="layout" name="banner"/>
       <item type="layout" name="recent_apps_row"/>
-      <item type="string" name="app_launcher_app_info_action"/>
-      <item type="string" name="app_launcher_stop_app_action"/>
       <item type="string" name="app_launcher_stop_app_cant_stop_text"/>
-      <item type="string" name="app_launcher_stop_app_dialog_text"/>
-      <item type="string" name="app_launcher_stop_app_dialog_title"/>
-      <item type="string" name="app_launcher_stop_app_success_toast_text"/>
       <item type="string" name="app_launcher_title_all_apps"/>
       <item type="string" name="app_launcher_title_media_only"/>
       <item type="string" name="banner_dismiss_button_text"/>

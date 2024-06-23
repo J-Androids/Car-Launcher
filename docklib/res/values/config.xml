@@ -21,10 +21,10 @@
 
     <!-- A list of components that are shown on Dock by default -->
     <string-array name="config_defaultDockApps" translatable="false">
-        <item>com.android.vending/com.google.android.finsky.carmainactivity.MainActivity</item>
         <item>com.android.car.settings/com.android.car.settings.Settings_Launcher_Homepage</item>
         <item>com.android.car.dialer/com.android.car.dialer.ui.TelecomActivity</item>
-        <item>com.google.android.apps.maps/com.google.android.maps.MapsActivity</item>
+        <item>com.android.contacts/com.android.contacts.activities.PeopleActivity</item>
+        <item>com.android.car.messenger/com.android.car.messenger.ui.launcher.MessageLauncherActivity</item>
     </string-array>
 
     <!-- A list of components that are excluded from being shown on Dock -->
@@ -36,7 +36,17 @@
     <string-array name="config_componentsExcludedFromDock" translatable="false">
         <item>com.google.android.apps.maps/com.google.android.apps.gmm.car.embedded.activity.LimitedMapsActivity</item>
         <item>com.google.android.carassistant/com.google.android.libraries.assistant.auto.tng.assistant.ui.activity.AutoAssistantActivity</item>
+        <item>com.android.car.media/com.android.car.media.MediaDispatcherActivity</item>
     </string-array>
 
-    <integer name="drag_drop_animate_in_duration">800</integer>
+    <!--
+    During drag and drop, when an item is dropped there are two consecutive animations:
+    1. move to the proper location and to a scaled down version (scale down)
+    2. change from the scaled down version to the final scale version (scale up)
+    -->
+    <integer name="drop_animation_scale_down_duration_ms">400</integer>
+    <integer name="drop_animation_scale_up_duration_ms">250</integer>
+
+    <!-- Duration of animation for when item is dragged over the drop location. -->
+    <integer name="excite_icon_animation_duration_ms">100</integer>
 </resources>
