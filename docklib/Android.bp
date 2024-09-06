@@ -17,6 +17,17 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+java_library_static {
+    name: "dock_item",
+    host_supported: true,
+    proto: {
+        type: "lite",
+    },
+    sdk_version: "module_current",
+    min_sdk_version: "31",
+    srcs: ["src/com/android/car/docklib/data/proto/dock_item.proto"],
+}
+
 android_library {
     name: "CarDockLib",
     srcs: [
@@ -37,7 +48,11 @@ android_library {
         "CarDockUtilLib",
         "CarLauncherCommon",
         "SystemUISharedLib",
-        "iconloader",
+        "//frameworks/libs/systemui:iconloader",
+        "car-resource-common",
+        "dock_item",
+        "car_launcher_flags_java_lib",
+        "car-media-common-no-overlayable",
     ],
 
     platform_apis: true,

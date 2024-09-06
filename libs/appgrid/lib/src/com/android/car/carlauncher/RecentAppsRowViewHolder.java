@@ -88,4 +88,3 @@ public class RecentAppsRowViewHolder extends RecyclerView.ViewHolder {
 
     }
 }
-

@@ -31,4 +31,10 @@
         <xliff:g id="app_name" example="Radio">%1$s</xliff:g>
         has been stopped.
     </string>
+
+    <!-- String for toast when user tries to launch NDO app when driving -->
+    <string name="ndo_launch_fail_toast_text">
+        <xliff:g id="app_name" example="Settings">%1$s</xliff:g>
+        can\'t be used while driving.
+    </string>
 </resources>

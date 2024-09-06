@@ -22,11 +22,10 @@
     <string name="app_launcher_title_all_apps" msgid="3522783138519460233">"همه برنامه‌ها"</string>
     <string name="app_launcher_title_media_only" msgid="7194631822174015710">"برنامه‌های رسانه"</string>
     <string name="app_launcher_stop_app_cant_stop_text" msgid="6513703446595313338">"برنامه متوقف نمی‌شود."</string>
-    <string name="driving_toast_text" msgid="397905281933065053">"هنگام رانندگی نمی‌توان از <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده کرد."</string>
     <string name="hide_debug_apps" msgid="7140064693464751647">"پنهان کردن برنامه‌های اشکال‌زدایی"</string>
     <string name="show_debug_apps" msgid="2748157232151197494">"نمایش برنامه‌های اشکال‌زدایی"</string>
     <string name="user_tos_activity_intent" msgid="5323981034042569291">"intent:#Intent;action=com.android.car.SHOW_USER_TOS_ACTIVITY;B.show_value_prop=false;end"</string>
     <string name="banner_title_text" msgid="8827498256184464356">"برای استفاده از برنامه‌هایی که به‌دلیل شرایط خدمات کاربر غیرفعال شده‌اند، با «شرایط خدمات کاربر» موافقت کنید"</string>
     <string name="banner_review_button_text" msgid="369410598918950148">"مرور کردن"</string>
-    <string name="banner_dismiss_button_text" msgid="5389352614429069562">"اکنون نه"</string>
+    <string name="banner_dismiss_button_text" msgid="5389352614429069562">"حالا نه"</string>
 </resources>

@@ -237,7 +237,7 @@ public class RecentTasksProvider implements RecentTasksProviderInterface {
     @Override
     public Bitmap getRecentTaskThumbnail(int taskId) {
         ThumbnailData thumbnailData = getRecentTaskThumbnailData(taskId);
-        return thumbnailData != null ? thumbnailData.thumbnail : null;
+        return thumbnailData != null ? thumbnailData.getThumbnail() : null;
     }
 
     @NonNull
@@ -320,11 +320,11 @@ public class RecentTasksProvider implements RecentTasksProviderInterface {
 
     private void getRecentTaskThumbnailAsync(int taskId) {
         sRecentsModelExecutor.execute(() -> {
-            ThumbnailData thumbnailData = mActivityManagerWrapper.getTaskThumbnail(
-                    taskId, /* isLowResolution= */ false);
             if (!mRecentTaskIdToTaskMap.containsKey(taskId)) {
                 return;
             }
+            ThumbnailData thumbnailData = mActivityManagerWrapper.getTaskThumbnail(
+                    taskId, /* isLowResolution= */ false);
             mRecentTaskIdToTaskMap.get(taskId).thumbnail = thumbnailData;
             if (mRecentsDataChangeListener != null) {
                 sMainHandler.post(
@@ -336,6 +336,9 @@ public class RecentTasksProvider implements RecentTasksProviderInterface {
     @VisibleForTesting
     void getRecentTaskIconAsync(int taskId) {
         sRecentsModelExecutor.execute(() -> {
+            if (!mRecentTaskIdToTaskMap.containsKey(taskId)) {
+                return;
+            }
             Task task = mRecentTaskIdToTaskMap.get(taskId);
             Task.TaskKey key = task.key;
             Drawable drawableIcon = getIconFromTaskDescription(task.taskDescription);
@@ -349,9 +352,6 @@ public class RecentTasksProvider implements RecentTasksProviderInterface {
                     // set it a default icon
                     drawableIcon = mDefaultIcon;
                 }
-            }
-            if (!mRecentTaskIdToTaskMap.containsKey(taskId)) {
-                return;
             }
             mRecentTaskIdToTaskMap.get(taskId).icon = drawableIcon;
             if (mRecentsDataChangeListener != null) {

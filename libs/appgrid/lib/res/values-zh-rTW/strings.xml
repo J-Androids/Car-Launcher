@@ -22,7 +22,6 @@
     <string name="app_launcher_title_all_apps" msgid="3522783138519460233">"所有應用程式"</string>
     <string name="app_launcher_title_media_only" msgid="7194631822174015710">"媒體應用程式"</string>
     <string name="app_launcher_stop_app_cant_stop_text" msgid="6513703446595313338">"無法停止應用程式。"</string>
-    <string name="driving_toast_text" msgid="397905281933065053">"開車時無法使用「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
     <string name="hide_debug_apps" msgid="7140064693464751647">"隱藏偵錯應用程式"</string>
     <string name="show_debug_apps" msgid="2748157232151197494">"顯示偵錯應用程式"</string>
     <string name="user_tos_activity_intent" msgid="5323981034042569291">"intent:#Intent;action=com.android.car.SHOW_USER_TOS_ACTIVITY;B.show_value_prop=false;end"</string>

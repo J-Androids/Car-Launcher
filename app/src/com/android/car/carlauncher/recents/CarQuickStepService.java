@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.recents.IRecentTasks;
 
 import java.util.List;
@@ -140,7 +141,7 @@ public class CarQuickStepService extends Service {
         }
 
         @Override
-        public void onSystemUiStateChanged(int stateFlags) {
+        public void onSystemUiStateChanged(@SystemUiStateFlags long stateFlags) {
             // no-op
         }
 

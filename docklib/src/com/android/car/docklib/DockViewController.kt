@@ -16,17 +16,25 @@
 
 package com.android.car.docklib
 
+import android.annotation.CallSuper
 import android.app.ActivityOptions
 import android.car.Car
 import android.car.content.pm.CarPackageManager
+import android.car.drivingstate.CarUxRestrictionsManager
 import android.car.media.CarMediaManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
 import android.os.Build
+import android.os.UserHandle
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.content.getSystemService
+import com.android.car.carlauncher.Flags
+import com.android.car.docklib.data.DockProtoDataController
 import com.android.car.docklib.events.DockEventsReceiver
 import com.android.car.docklib.events.DockPackageChangeReceiver
 import com.android.car.docklib.media.MediaUtils
@@ -35,8 +43,10 @@ import com.android.car.docklib.view.DockAdapter
 import com.android.car.docklib.view.DockView
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.shared.system.TaskStackChangeListeners
+import java.io.File
 import java.lang.ref.WeakReference
 import java.util.UUID
+import kotlin.collections.emptyList
 
 /**
  * Create a controller for DockView. It initializes the view with default and persisted icons. Upon
@@ -44,12 +54,14 @@ import java.util.UUID
  *
  * @param dockView the inflated dock view
  * @param userContext the foreground user context, since the view may be hosted on system context
+ * @param dataFile a file to store user's pinned apps with read and write permission
  */
-class DockViewController(
+open class DockViewController(
         dockView: DockView,
         private val userContext: Context = dockView.context,
+        dataFile: File,
 ) : DockInterface {
-    private companion object {
+    companion object {
         private const val TAG = "DockViewController"
         private val DEBUG = Build.isDebuggable()
     }
@@ -58,15 +70,23 @@ class DockViewController(
     private val car: Car
     private val dockViewWeakReference: WeakReference<DockView>
     private val dockViewModel: DockViewModel
+    private val adapter: DockAdapter
     private val dockEventsReceiver: DockEventsReceiver
     private val dockPackageChangeReceiver: DockPackageChangeReceiver
     private val taskStackChangeListeners: TaskStackChangeListeners
     private val dockTaskStackChangeListener: DockTaskStackChangeListener
     private val launcherApps = userContext.getSystemService<LauncherApps>()
+    private val excludedItemsProviders: Set<ExcludedItemsProvider> =
+        hashSetOf(ResourceExcludedItemsProvider(userContext))
+    private val mediaSessionManager: MediaSessionManager
+    private val sessionChangedListener: MediaSessionManager.OnActiveSessionsChangedListener =
+        MediaSessionManager.OnActiveSessionsChangedListener { mediaControllers ->
+            handleMediaSessionChange(mediaControllers)
+        }
 
     init {
         if (DEBUG) Log.d(TAG, "Init DockViewController for user ${userContext.userId}")
-        val adapter = DockAdapter(this, userContext)
+        adapter = DockAdapter(this, userContext)
         dockView.setAdapter(adapter)
         dockViewWeakReference = WeakReference(dockView)
 
@@ -83,12 +103,18 @@ class DockViewController(
                 defaultPinnedItems = dockView.resources
                         .getStringArray(R.array.config_defaultDockApps)
                         .mapNotNull(ComponentName::unflattenFromString),
-                excludedComponents = dockView.resources
-                        .getStringArray(R.array.config_componentsExcludedFromDock)
-                        .mapNotNull(ComponentName::unflattenFromString).toHashSet(),
-                excludedPackages = dockView.resources
-                        .getStringArray(R.array.config_packagesExcludedFromDock).toHashSet(),
-                iconFactory = IconFactory.obtain(dockView.context)
+                isPackageExcluded = { pkg ->
+                    getExcludedItemsProviders()
+                            .map { it.isPackageExcluded(pkg) }
+                            .reduce { res1, res2 -> res1 or res2 }
+                },
+                isComponentExcluded = { cmp ->
+                    getExcludedItemsProviders()
+                            .map { it.isComponentExcluded(cmp) }
+                            .reduce { res1, res2 -> res1 or res2 }
+                },
+                iconFactory = IconFactory.obtain(dockView.context),
+                dockProtoDataController = DockProtoDataController(dataFile),
         ) { updatedApps ->
             dockViewWeakReference.get()?.getAdapter()?.submitList(updatedApps)
                     ?: throw NullPointerException("the View referenced does not exist")
@@ -106,9 +132,38 @@ class DockViewController(
                     car.getCarManager(CarMediaManager::class.java)?.let { carMM ->
                         adapter.setCarMediaManager(carMM)
                     }
+                    car.getCarManager(CarUxRestrictionsManager::class.java)?.let {
+                        adapter.setUxRestrictions(
+                            isUxRestrictionEnabled =
+                            it.currentCarUxRestrictions?.isRequiresDistractionOptimization ?: false
+                        )
+                        it.registerListener { carUxRestrictions ->
+                            adapter.setUxRestrictions(
+                                isUxRestrictionEnabled =
+                                carUxRestrictions.isRequiresDistractionOptimization
+                            )
+                        }
+                    }
                 }
             }
         }
+        mediaSessionManager =
+            userContext.getSystemService(MediaSessionManager::class.java) as MediaSessionManager
+        if (Flags.mediaSessionCard()) {
+            handleMediaSessionChange(mediaSessionManager.getActiveSessionsForUser(
+                /* notificationListener= */
+                null,
+                UserHandle.of(userContext.userId)
+            ))
+            mediaSessionManager.addOnActiveSessionsChangedListener(
+                /* notificationListener= */
+                null,
+                UserHandle.of(userContext.userId),
+                userContext.getMainExecutor(),
+                sessionChangedListener
+            )
+        }
+
         dockEventsReceiver = DockEventsReceiver.registerDockReceiver(userContext, this)
         dockPackageChangeReceiver = DockPackageChangeReceiver.registerReceiver(userContext, this)
         dockTaskStackChangeListener =
@@ -118,14 +173,19 @@ class DockViewController(
     }
 
     /** Method to stop the dock. Call this upon View being destroyed. */
-    fun destroy() {
+    @CallSuper
+    open fun destroy() {
         if (DEBUG) Log.d(TAG, "Destroy called")
+        car.getCarManager(CarUxRestrictionsManager::class.java)?.unregisterListener()
         car.disconnect()
         userContext.unregisterReceiver(dockEventsReceiver)
         userContext.unregisterReceiver(dockPackageChangeReceiver)
         taskStackChangeListeners.unregisterTaskStackListener(dockTaskStackChangeListener)
+        mediaSessionManager.removeOnActiveSessionsChangedListener(sessionChangedListener)
         dockViewModel.destroy()
     }
+
+    open fun getExcludedItemsProviders(): Set<ExcludedItemsProvider> = excludedItemsProviders
 
     override fun appPinned(componentName: ComponentName) = dockViewModel.pinItem(componentName)
 
@@ -173,4 +233,15 @@ class DockViewController(
 
     override fun getMediaServiceComponents(): Set<ComponentName> =
         dockViewModel.getMediaServiceComponents()
+
+    private fun handleMediaSessionChange(mediaControllers: List<MediaController>?) {
+        val activeMediaSessions = mediaControllers?.filter {
+            it.playbackState?.let { playbackState ->
+                (playbackState.isActive ||
+                        playbackState.actions and PlaybackStateCompat.ACTION_PLAY != 0L)
+            } ?: false
+        }?.map { it.packageName } ?: emptyList()
+
+        adapter.onMediaSessionChange(activeMediaSessions)
+    }
 }

@@ -20,7 +20,6 @@ import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_RESOLVED_FILTER
-import android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
 import android.content.pm.ResolveInfo
 import android.provider.Settings
 import android.text.TextUtils
@@ -74,12 +73,13 @@ internal object RestrictedAppsUtils {
         packageManager: PackageManager,
         contentResolver: ContentResolver,
         secureKey: String,
-        separator: String
+        separator: String,
+        filter: Int
     ): List<ResolveInfo> {
         return packageManager.queryIntentActivities(
             Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER),
             PackageManager.ResolveInfoFlags.of(
-                (GET_RESOLVED_FILTER or MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+                (GET_RESOLVED_FILTER or filter).toLong()
             )
         ).filter {
             getRestrictedPackages(

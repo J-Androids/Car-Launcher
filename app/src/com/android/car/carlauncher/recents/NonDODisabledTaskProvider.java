@@ -27,9 +27,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
-import com.android.car.carlauncher.R;
+import com.android.car.carlaunchercommon.toasts.NonDrivingOptimizedLaunchFailedToast;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -100,9 +99,8 @@ public class NonDODisabledTaskProvider implements RecentTasksViewModel.DisabledT
                 }
                 return;
             }
-            CharSequence appName = ai.loadLabel(mPackageManager);
-            String warningText = v.getResources().getString(R.string.driving_toast_text, appName);
-            Toast.makeText(v.getContext(), warningText, Toast.LENGTH_SHORT).show();
+            NonDrivingOptimizedLaunchFailedToast.Companion.showToast(
+                    v.getContext(), ai.loadLabel(mPackageManager).toString());
         };
     }
 

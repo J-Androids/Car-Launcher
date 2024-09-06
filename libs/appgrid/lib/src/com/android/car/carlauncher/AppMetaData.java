@@ -127,7 +127,9 @@ public final class AppMetaData {
             return false;
         } else {
             return ((AppMetaData) o).getComponentName().equals(mComponentName)
-                    && ((AppMetaData) o).getIsMirroring() == mIsMirroring;
+                    && ((AppMetaData) o).getIsMirroring() == mIsMirroring
+                    && ((AppMetaData) o).getIsDisabledByTos() == mIsDisabledByTos
+                    && ((AppMetaData) o).getIsDistractionOptimized() == mIsDistractionOptimized;
         }
     }
 

@@ -21,6 +21,7 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 
 import androidx.fragment.app.testing.FragmentScenario;
+import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.android.car.carlauncher.R;
 import com.android.car.media.common.MediaItemMetadata;
@@ -81,28 +83,31 @@ public class CalmModeFragmentTest {
     }
 
     @Test
-    public void fragmentResumed_testClock_isVisible() {
+    public void fragmentResumed_testClock_isInvisible() {
         mFragmentScenario.moveToState(RESUMED);
 
-        onView(withId(R.id.clock)).check(matches(isDisplayed()));
+        onView(withId(R.id.clock)).check(matches(withEffectiveVisibility(
+                ViewMatchers.Visibility.INVISIBLE)));
     }
 
     @Test
-    public void fragmentResumed_testDate_isVisible() {
+    public void fragmentResumed_testDate_isInvisible() {
         mFragmentScenario.moveToState(RESUMED);
 
-        onView(withId(R.id.date)).check(matches(isDisplayed()));
+        onView(withId(R.id.date)).check(matches(withEffectiveVisibility(
+                ViewMatchers.Visibility.INVISIBLE)));
     }
 
     @Test
-    public void fragmentResumed_testMedia_isVisible() {
+    public void fragmentResumed_testMedia_isInvisible() {
         mFragmentScenario.moveToState(RESUMED);
 
         mActivity.runOnUiThread(()->mCalmModeFragment.updateMediaTitle(testMediaItem));
 
-        onView(withId(R.id.media_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.media_title)).check(matches(withEffectiveVisibility(
+                ViewMatchers.Visibility.INVISIBLE)));
         String expectedText =
-                TEST_MEDIA_TITLE.toString() + "   •   " + TEST_MEDIA_SUB_TITLE.toString();
+                TEST_MEDIA_TITLE + "   •   " + TEST_MEDIA_SUB_TITLE;
         onView(withId(R.id.media_title)).check(matches(withText(expectedText)));
     }
 
@@ -132,7 +137,8 @@ public class CalmModeFragmentTest {
 
         mActivity.runOnUiThread(()->mCalmModeFragment.updateMediaTitle(testMediaItem));
 
-        onView(withId(R.id.media_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.media_title)).check(matches(withEffectiveVisibility(
+                ViewMatchers.Visibility.INVISIBLE)));
         onView(withId(R.id.media_title)).check(matches(withText(TEST_MEDIA_TITLE.toString())));
     }
 }

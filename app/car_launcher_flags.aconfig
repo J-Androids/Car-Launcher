@@ -7,3 +7,17 @@ flag {
   description: "This flag controls Calm mode"
   bug: "295396130"
 }
+
+flag {
+  name: "media_session_card"
+  namespace: "car_sys_exp"
+  description: "This flag controls whether the media card uses media sessions"
+  bug: "323250843"
+}
+
+flag {
+  name: "media_card_fullscreen"
+  namespace: "car_sys_exp"
+  description: "This flag controls Media widget redesign"
+  bug: "310686518"
+}

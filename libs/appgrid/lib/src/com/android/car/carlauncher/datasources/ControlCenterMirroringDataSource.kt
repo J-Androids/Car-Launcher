@@ -124,27 +124,13 @@ class ControlCenterMirroringDataSourceImpl(
         return callbackFlow {
             // Send empty mirroring packet to signify that no mirroring is ongoing
             trySend(MirroringPackageData.NO_MIRRORING)
-            if (Looper.myLooper() == null) {
-                Looper.prepare()
-            }
-            val looper: Looper =
-                Looper.myLooper().takeIf { it != null } ?: Looper.getMainLooper().also {
-                    Log.w(
-                        TAG,
-                        "Current thread looper for mirroring session is null, fallback to " +
-                                "MainLooper"
-                    )
-                }
+            val looper = Looper.getMainLooper()
             val clientMessenger = getReceiverMessenger(looper, this)
             val serviceConnection = getMirroringConnectionService(clientMessenger, this)
             registerReceiver(serviceConnection, this)
 
             awaitClose {
                 unregisterReceiver(serviceConnection)
-                // If MainLooper do not quit it. MainLooper always stays alive.
-                if (looper != Looper.getMainLooper()) {
-                    looper.quitSafely()
-                }
             }
         }.flowOn(bgDispatcher).conflate()
     }

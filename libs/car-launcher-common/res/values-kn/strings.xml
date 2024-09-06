@@ -19,14 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_pin_shortcut_label" msgid="7319916279393348946">"ಆ್ಯಪ್ ಪಿನ್ ಮಾಡಿ"</string>
     <string name="dock_unpin_shortcut_label" msgid="1657441916649851101">"ಆ್ಯಪ್ ಅನ್‌ಪಿನ್ ಮಾಡಿ"</string>
-    <!-- no translation found for stop_app_shortcut_label (5893149773635675147) -->
-    <skip />
-    <!-- no translation found for app_info_shortcut_label (6724408677044314793) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_title (7027389231920405129) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_text (4997162043741899166) -->
-    <skip />
-    <!-- no translation found for stop_app_success_toast_text (3740858295088091414) -->
-    <skip />
+    <string name="stop_app_shortcut_label" msgid="5893149773635675147">"ಆ್ಯಪ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ"</string>
+    <string name="app_info_shortcut_label" msgid="6724408677044314793">"ಆ್ಯಪ್ ಮಾಹಿತಿ"</string>
+    <string name="stop_app_dialog_title" msgid="7027389231920405129">"ಆ್ಯಪ್ ಅನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
+    <string name="stop_app_dialog_text" msgid="4997162043741899166">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಬಲವಂತವಾಗಿ ನಿಲ್ಲಿಸಿದರೆ, ಅದು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರಬಹುದು."</string>
+    <string name="stop_app_success_toast_text" msgid="3740858295088091414">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ."</string>
+    <string name="ndo_launch_fail_toast_text" msgid="633927891331266600">"ಡ್ರೈವ್ ಮಾಡುವಾಗ <xliff:g id="APP_NAME">%1$s</xliff:g> ಬಳಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
 </resources>

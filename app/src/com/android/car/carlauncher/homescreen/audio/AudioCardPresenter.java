@@ -16,6 +16,7 @@
 
 package com.android.car.carlauncher.homescreen.audio;
 
+import com.android.car.carlauncher.Flags;
 import com.android.car.carlauncher.homescreen.CardPresenter;
 import com.android.car.carlauncher.homescreen.HomeCardFragment;
 import com.android.car.carlauncher.homescreen.HomeCardInterface;
@@ -43,7 +44,9 @@ public class AudioCardPresenter extends CardPresenter {
                 @Override
                 public void onViewCreated() {
                     mDialerPresenter.setView(mFragment.getInCallFragment());
-                    mMediaPresenter.setView(mFragment.getMediaFragment());
+                    if (!Flags.mediaCardFullscreen()) {
+                        mMediaPresenter.setView(mFragment.getMediaFragment());
+                    }
                 }
 
                 @Override
@@ -58,15 +61,18 @@ public class AudioCardPresenter extends CardPresenter {
 
         mDialerPresenter.setOnInCallStateChangeListener(hasActiveCall -> {
             if (hasActiveCall) {
-                mMediaPresenter.setShowMedia(false);
+                if (!Flags.mediaCardFullscreen()) {
+                    mMediaPresenter.setShowMedia(false);
+                }
                 mFragment.showInCallCard();
             } else {
-                mMediaPresenter.setShowMedia(true);
+                if (!Flags.mediaCardFullscreen()) {
+                    mMediaPresenter.setShowMedia(true);
+                }
                 mFragment.showMediaCard();
             }
         });
     }
-
 
     // Deprecated. Use setModel instead.
     @Override
@@ -77,7 +83,9 @@ public class AudioCardPresenter extends CardPresenter {
     /** Sets the model for this presenter. */
     public void setModel(AudioCardModel viewModel) {
         mDialerPresenter.setModel(viewModel.getInCallViewModel());
-        mMediaPresenter.setModel(viewModel.getMediaViewModel());
+        if (!Flags.mediaCardFullscreen()) {
+            mMediaPresenter.setModel(viewModel.getMediaViewModel());
+        }
     }
 
     @Override

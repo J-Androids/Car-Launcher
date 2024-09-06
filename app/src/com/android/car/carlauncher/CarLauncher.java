@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -202,11 +203,20 @@ public class CarLauncher extends FragmentActivity {
                 .get(CarLauncherViewModel.class);
 
         getLifecycle().addObserver(mCarLauncherViewModel);
+        addOnNewIntentListener(mCarLauncherViewModel.getNewIntentListener());
 
         mCarLauncherViewModel.getRemoteCarTaskView().observe(this, taskView -> {
-            if (taskView != null && taskView.getParent() == null) {
-                parent.addView(taskView);
+            if (taskView == null || taskView.getParent() == parent) {
+                // Discard if the parent is still the same because it doesn't signify a config
+                // change.
+                return;
             }
+            if (taskView.getParent() != null) {
+                // Discard the previous parent as its invalid now.
+                ((ViewGroup) taskView.getParent()).removeView(taskView);
+            }
+            parent.removeAllViews(); // Just a defense against a dirty parent.
+            parent.addView(taskView);
         });
     }
 
@@ -236,10 +246,13 @@ public class CarLauncher extends FragmentActivity {
     }
 
     private void release() {
-        // When using a ViewModel for the RemoteCarTaskViews, the task view can still be attached
-        // to the mMapsCard due to which the CarLauncher activity does not get garbage collected
-        // during activity recreation.
-        mMapsCard = null;
+        if (mMapsCard != null) {
+            // This is important as the TaskView is preserved during config change in ViewModel and
+            // to avoid the memory leak, it should be plugged out of the View hierarchy.
+            mMapsCard.removeAllViews();
+            mMapsCard = null;
+        }
+
         if (mCar != null) {
             mCar.disconnect();
             mCar = null;
@@ -261,6 +274,11 @@ public class CarLauncher extends FragmentActivity {
                     long reflectionStartTime = System.currentTimeMillis();
                     HomeCardModule cardModule = (HomeCardModule)
                             Class.forName(providerClassName).newInstance();
+                    if (Flags.mediaCardFullscreen()) {
+                        if (cardModule.getCardResId() == R.id.top_card) {
+                            findViewById(R.id.top_card).setVisibility(View.GONE);
+                        }
+                    }
                     cardModule.setViewModelProvider(new ViewModelProvider(/* owner= */this));
                     mHomeCardModules.add(cardModule);
                     if (DEBUG) {

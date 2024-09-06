@@ -33,6 +33,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.android.car.docklib.data.DockAppItem
 import com.android.car.docklib.data.DockItemId
+import com.android.car.docklib.data.DockProtoDataController
 import com.android.car.docklib.media.MediaUtils
 import com.android.car.docklib.task.TaskUtils
 import com.android.launcher3.icons.BaseIconFactory
@@ -53,9 +54,10 @@ open class DockViewModel(
         private val userId: Int = context.userId,
         private var launcherActivities: MutableSet<ComponentName>,
         defaultPinnedItems: List<ComponentName>,
-        private val excludedComponents: Set<ComponentName>,
-        private val excludedPackages: Set<String>,
+        private val isPackageExcluded: (pkg: String) -> Boolean,
+        private val isComponentExcluded: (component: ComponentName) -> Boolean,
         private val iconFactory: IconFactory = IconFactory.obtain(context),
+        private val dockProtoDataController: DockProtoDataController,
         private val observer: Observer<List<DockAppItem>>,
 ) {
 
@@ -86,19 +88,31 @@ open class DockViewModel(
             Collections.synchronizedMap(LinkedHashMap<Int, DockAppItem>())
 
     init {
-        defaultPinnedItems.forEachIndexed { index, component ->
-            if (index < maxItemsInDock) {
+        initializeDockItems(defaultPinnedItems)
+        currentItems.value = createDockList()
+        currentItems.observeForever(observer)
+    }
+
+    private fun initializeDockItems(defaultPinnedItems: List<ComponentName>) {
+        dockProtoDataController.loadFromFile()?.let { savedPinnedDockItems ->
+            if (DEBUG) Log.d(TAG, "Initialized using saved items")
+            savedPinnedDockItems.forEach { (index, component) ->
+                createDockItem(component, DockAppItem.Type.STATIC, isMediaApp(component))?.let {
+                    internalItems[index] = it
+                }
+            }
+        } ?: run {
+            if (DEBUG) Log.d(TAG, "Initialized using default items")
+            for (index in 0..<minOf(maxItemsInDock, defaultPinnedItems.size)) {
                 createDockItem(
-                    component,
+                    defaultPinnedItems[index],
                     DockAppItem.Type.STATIC,
-                    isMediaApp(component)
-                )?.let { dockItem ->
-                    internalItems[index] = dockItem
+                    isMediaApp(defaultPinnedItems[index])
+                )?.let {
+                    internalItems[index] = it
                 }
             }
         }
-        currentItems.value = createDockList()
-        currentItems.observeForever(observer)
     }
 
     /** Pin an existing dock item with given [id]. It is assumed the item is not pinned/static. */
@@ -116,6 +130,7 @@ open class DockViewModel(
                 }
         // update list regardless to update the listeners
         currentItems.value = createDockList()
+        savePinnedItemsToProto()
     }
 
     /**
@@ -154,6 +169,7 @@ open class DockViewModel(
         }
         // update list regardless to update the listeners
         currentItems.value = createDockList()
+        savePinnedItemsToProto()
     }
 
     /** Removes item with the given [id] from the dock. */
@@ -170,6 +186,7 @@ open class DockViewModel(
                 }
         // update list regardless to update the listeners
         currentItems.value = createDockList()
+        savePinnedItemsToProto()
     }
 
     /** Removes all items of the given [packageName] from the dock. */
@@ -182,6 +199,7 @@ open class DockViewModel(
         }
         launcherActivities.removeAll { it.packageName == packageName }
         currentItems.value = createDockList()
+        savePinnedItemsToProto()
     }
 
     /** Adds all media service components for the given [packageName]. */
@@ -241,13 +259,16 @@ open class DockViewModel(
     fun setCarPackageManager(carPackageManager: CarPackageManager) {
         this.carPackageManager = carPackageManager
         internalItems.forEach { mapEntry ->
-            internalItems[mapEntry.key] = mapEntry.value.copy(
-                    isDistractionOptimized = carPackageManager.isActivityDistractionOptimized(
-                            mapEntry.value.component.packageName,
-                            mapEntry.value.component.className
-                    )
+            val item = mapEntry.value
+            internalItems[mapEntry.key] = item.copy(
+                    isDistractionOptimized = item.isMediaApp ||
+                            carPackageManager.isActivityDistractionOptimized(
+                                    item.component.packageName,
+                                    item.component.className
+                            )
             )
         }
+        currentItems.value = createDockList()
     }
 
     @VisibleForTesting
@@ -303,6 +324,13 @@ open class DockViewModel(
         return convertMapToList(internalItems)
     }
 
+    private fun savePinnedItemsToProto() {
+        dockProtoDataController.savePinnedItemsToFile(
+            internalItems.filter { entry -> entry.value.type == DockAppItem.Type.STATIC }
+                    .mapValues { entry -> entry.value.component }
+        )
+    }
+
     /** Use the mapping index->item to create the ordered list of Dock items */
     private fun convertMapToList(map: Map<Int, DockAppItem>): List<DockAppItem> =
             List(maxItemsInDock) { index -> map[index] }.filterNotNull()
@@ -349,8 +377,7 @@ open class DockViewModel(
     }
 
     private fun isItemExcluded(component: ComponentName): Boolean =
-            (excludedPackages.contains(component.packageName) ||
-                    excludedComponents.contains(component))
+            (isPackageExcluded(component.packageName) || isComponentExcluded(component))
 
     private fun isItemInDock(component: ComponentName, ofType: DockAppItem.Type? = null): Boolean {
         return internalItems.values
