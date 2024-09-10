@@ -22,7 +22,6 @@
     <string name="app_launcher_title_all_apps" msgid="3522783138519460233">"Усе праграмы"</string>
     <string name="app_launcher_title_media_only" msgid="7194631822174015710">"Мультымедыйныя праграмы"</string>
     <string name="app_launcher_stop_app_cant_stop_text" msgid="6513703446595313338">"Немагчыма спыніць праграму."</string>
-    <string name="driving_toast_text" msgid="397905281933065053">"Праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" нельга карыстацца, калі вы за рулём."</string>
     <string name="hide_debug_apps" msgid="7140064693464751647">"Схаваць праграмы адладкі"</string>
     <string name="show_debug_apps" msgid="2748157232151197494">"Паказаць праграмы адладкі"</string>
     <string name="user_tos_activity_intent" msgid="5323981034042569291">"intent:#Intent;action=com.android.car.SHOW_USER_TOS_ACTIVITY;B.show_value_prop=false;end"</string>

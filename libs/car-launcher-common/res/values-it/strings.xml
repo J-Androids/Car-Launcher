@@ -18,15 +18,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_pin_shortcut_label" msgid="7319916279393348946">"Fissa app"</string>
-    <string name="dock_unpin_shortcut_label" msgid="1657441916649851101">"Stacca app"</string>
-    <!-- no translation found for stop_app_shortcut_label (5893149773635675147) -->
-    <skip />
-    <!-- no translation found for app_info_shortcut_label (6724408677044314793) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_title (7027389231920405129) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_text (4997162043741899166) -->
-    <skip />
-    <!-- no translation found for stop_app_success_toast_text (3740858295088091414) -->
-    <skip />
+    <string name="dock_unpin_shortcut_label" msgid="1657441916649851101">"Sblocca app"</string>
+    <string name="stop_app_shortcut_label" msgid="5893149773635675147">"Interrompi l\'app"</string>
+    <string name="app_info_shortcut_label" msgid="6724408677044314793">"Informazioni app"</string>
+    <string name="stop_app_dialog_title" msgid="7027389231920405129">"Interrompere l\'app?"</string>
+    <string name="stop_app_dialog_text" msgid="4997162043741899166">"Se forzi l\'interruzione di un\'app, questa potrebbe funzionare in modo anomalo."</string>
+    <string name="stop_app_success_toast_text" msgid="3740858295088091414">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> è stata interrotta."</string>
+    <string name="ndo_launch_fail_toast_text" msgid="633927891331266600">"Non è possibile usare l\'app <xliff:g id="APP_NAME">%1$s</xliff:g> durante la guida."</string>
 </resources>

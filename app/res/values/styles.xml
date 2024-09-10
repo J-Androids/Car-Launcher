@@ -120,8 +120,9 @@
 
     <style name="CalmModeClock" parent="TextAppearance.Car.Display">
         <item name="android:fontFamily">roboto-flex</item>
+        <item name="android:textFontWeight">300</item>
         <item name="android:fontVariationSettings">"'wght' 300, 'wdth' 100, 'xtra' 468, 'xopq' 96, 'yopq' 79, 'ytuc' 712, 'ytas' 750, 'ytde' -203, 'ytfi' 738, 'opsz' 144"</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/car_neutral_90</item>
         <item name="android:textSize">300sp</item>
         <item name="android:textAlignment">center</item>
         <item name="android:format12Hour">hh:mm</item>
@@ -130,6 +131,20 @@
         <item name="android:lineSpacingMultiplier">1</item>
         <item name="android:lineSpacingExtra">0pt</item>
 
+    </style>
+
+    <style name="MediaCardPanelButtonStyle">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/media_card_panel_button_icon_padding</item>
+        <item name="android:cropToPadding">true</item>
+        <item name="android:tint">@color/media_card_panel_button_tint_state_list</item>
+        <item name="android:background">@drawable/media_card_panel_button_shape</item>
+    </style>
+
+    <style name="MediaCardCustomActionButtonStyle">
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:tint">@color/car_on_surface</item>
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
 </resources>

@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 
 import androidx.lifecycle.MutableLiveData;
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -111,6 +112,7 @@ public class MediaViewModelTest extends AbstractExtendedMockitoTestCase  {
     }
 
     @Before
+    @UiThreadTest
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mMediaViewModel = new MediaViewModel(ApplicationProvider.getApplicationContext(),

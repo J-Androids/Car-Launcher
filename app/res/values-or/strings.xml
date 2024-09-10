@@ -35,4 +35,6 @@
     <string name="recents_clear_all_text" msgid="3594272268167720553">"ସବୁ ଖାଲି କରନ୍ତୁ"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"ଆପ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"ଶାନ୍ତ ମୋଡ"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"ଧାଡ଼ି"</string>
+    <string name="media_card_history_header_title" msgid="6753954322481732596">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
 </resources>

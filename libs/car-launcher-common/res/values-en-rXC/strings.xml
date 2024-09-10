@@ -24,4 +24,5 @@
     <string name="stop_app_dialog_title" msgid="7027389231920405129">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‎‏‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‎‎‎‎‏‎‏‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‎Stop app?‎‏‎‎‏‎"</string>
     <string name="stop_app_dialog_text" msgid="4997162043741899166">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‎‎If you force stop an app, it may misbehave.‎‏‎‎‏‎"</string>
     <string name="stop_app_success_toast_text" msgid="3740858295088091414">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‏‎‏‏‎‎‏‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‎‏‎‎‎‏‎‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ has been stopped.‎‏‎‎‏‎"</string>
+    <string name="ndo_launch_fail_toast_text" msgid="633927891331266600">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‎‎‎‎‏‎‏‎‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‏‏‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ can\'t be used while driving.‎‏‎‎‏‎"</string>
 </resources>

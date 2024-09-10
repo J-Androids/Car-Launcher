@@ -19,6 +19,7 @@ package com.android.car.carlauncher.datasources.restricted
 import android.car.settings.CarSettings
 import android.content.ContentResolver
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
 import android.content.pm.ResolveInfo
 import android.database.ContentObserver
 import android.os.Handler
@@ -65,7 +66,8 @@ class DisabledAppsDataSourceImpl(
                     packageManager,
                     contentResolver,
                     CarSettings.Secure.KEY_PACKAGES_DISABLED_ON_RESOURCE_OVERUSE,
-                    PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR
+                    PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR,
+                    MATCH_DISABLED_UNTIL_USED_COMPONENTS
                 )
             )
             if (Looper.myLooper() == null) {
@@ -85,7 +87,8 @@ class DisabledAppsDataSourceImpl(
                             packageManager,
                             contentResolver,
                             CarSettings.Secure.KEY_PACKAGES_DISABLED_ON_RESOURCE_OVERUSE,
-                            PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR
+                            PACKAGES_DISABLED_ON_RESOURCE_OVERUSE_SEPARATOR,
+                            MATCH_DISABLED_UNTIL_USED_COMPONENTS
                         )
                     )
                 }

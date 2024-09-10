@@ -19,14 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_pin_shortcut_label" msgid="7319916279393348946">"Phina i-app"</string>
     <string name="dock_unpin_shortcut_label" msgid="1657441916649851101">"Susa ukuphina i-app"</string>
-    <!-- no translation found for stop_app_shortcut_label (5893149773635675147) -->
-    <skip />
-    <!-- no translation found for app_info_shortcut_label (6724408677044314793) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_title (7027389231920405129) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_text (4997162043741899166) -->
-    <skip />
-    <!-- no translation found for stop_app_success_toast_text (3740858295088091414) -->
-    <skip />
+    <string name="stop_app_shortcut_label" msgid="5893149773635675147">"Misa i-app"</string>
+    <string name="app_info_shortcut_label" msgid="6724408677044314793">"Ulwazi lwe-app"</string>
+    <string name="stop_app_dialog_title" msgid="7027389231920405129">"Misa i-app?"</string>
+    <string name="stop_app_dialog_text" msgid="4997162043741899166">"Uma uphoqelela ukumisa i-app, kungenzeka ukuthi ingasebenzi kahle."</string>
+    <string name="stop_app_success_toast_text" msgid="3740858295088091414">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> imisiwe."</string>
+    <string name="ndo_launch_fail_toast_text" msgid="633927891331266600">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayikwazi ukusetshenziswa ngenkathi ushayela."</string>
 </resources>

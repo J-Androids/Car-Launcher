@@ -48,6 +48,8 @@ public class MediaIntentRouter {
      * Dispatch a media intent to {@link IntentHandler}
      */
     public void handleMediaIntent(Intent intent) {
-        mIntentHandler.handleIntent(intent);
+        if (intent != null) {
+            mIntentHandler.handleIntent(intent);
+        }
     }
 }
