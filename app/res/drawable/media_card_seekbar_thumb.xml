@@ -1,0 +1,43 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="32dp"
+    android:viewportWidth="12"
+    android:viewportHeight="32"
+    >
+    <group>
+        <clip-path
+            android:pathData="M6 4C7.10457 4 8 4.89543 8 6V26C8 27.1046 7.10457 28 6 28C4.89543 28 4 27.1046 4 26V6C4 4.89543 4.89543 4 6 4Z"
+            />
+        <path
+            android:pathData="M4 4V28H8V4"
+            android:fillColor="@color/media_card_seekbar_thumb_color"
+            />
+    </group>
+    <group>
+        <clip-path
+            android:pathData="M0 0V32H12V0M6 4C7.10457 4 8 4.89543 8 6V26C8 27.1046 7.10457 28 6 28C4.89543 28 4 27.1046 4 26V6C4 4.89543 4.89543 4 6 4Z"
+            />
+        <path
+            android:pathData="M6 4C7.10457 4 8 4.89543 8 6V26C8 27.1046 7.10457 28 6 28C4.89543 28 4 27.1046 4 26V6C4 4.89543 4.89543 4 6 4Z"
+            android:strokeWidth="4"
+            android:strokeColor="@android:color/transparent"
+            />
+    </group>
+</vector>

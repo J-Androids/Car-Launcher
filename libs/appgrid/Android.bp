@@ -48,6 +48,7 @@ android_library {
         "car-media-common",
         "guava",
         "car-ui-lib",
+        "car_launcher_flags_java_lib",
         "launcher_item",
         "CarDockUtilLib",
         "androidx.lifecycle_lifecycle-runtime-ktx",

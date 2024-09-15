@@ -1,0 +1,120 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:id="@+id/overflow_grid"
+        android:stretchColumns="0,1"
+        android:background="@color/car_surface">
+        <TableRow
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/playback_action_id3"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle" />
+            <ImageButton
+                android:id="@+id/playback_action_id4"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle" />
+        </TableRow>
+
+        <TableRow
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/playback_action_id5"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle" />
+            <ImageButton
+                android:id="@+id/playback_action_id6"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle" />
+        </TableRow>
+
+        <TableRow
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/playback_action_id7"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle"/>
+            <ImageButton
+                android:id="@+id/playback_action_id8"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle" />
+        </TableRow>
+
+        <TableRow
+            android:layout_weight="1"
+            android:gravity="center">
+            <ImageButton
+                android:id="@+id/playback_action_id9"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle"/>
+            <ImageButton
+                android:id="@+id/playback_action_id10"
+                android:layout_width="@dimen/media_card_small_button_size"
+                android:layout_height="@dimen/media_card_small_button_size"
+                style="@style/MediaCardCustomActionButtonStyle"/>
+        </TableRow>
+    </TableLayout>
+
+    <FrameLayout
+        android:id="@+id/queue_list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="@dimen/media_card_horizontal_margin"
+        android:paddingEnd="@dimen/media_card_horizontal_margin"
+        android:background="@color/car_surface"
+        android:visibility="gone">
+        <com.android.car.apps.common.CarUiRecyclerViewNoScrollbar
+            android:id="@+id/queue_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:enableDivider="true"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="@dimen/media_card_recycler_view_fading_edge_length"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/history_list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/car_surface"
+        android:visibility="gone">
+        <com.android.car.apps.common.CarUiRecyclerViewNoScrollbar
+            android:id="@+id/history_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:enableDivider="true"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="@dimen/media_card_recycler_view_fading_edge_length"/>
+    </FrameLayout>
+</FrameLayout>

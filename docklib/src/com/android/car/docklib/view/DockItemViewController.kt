@@ -38,8 +38,10 @@ class DockItemViewController(
     private val excitedIconStrokeWidth: Float,
     private val staticIconStrokeColor: Int,
     private val excitedIconStrokeColor: Int,
+    private val restrictedIconStrokeColor: Int,
     private val defaultIconColor: Int,
     private val excitedColorFilter: ColorFilter,
+    private val restrictedColorFilter: ColorFilter,
     private val excitedIconColorFilterAlpha: Float,
     private val exciteAnimationDuration: Int,
 ) {
@@ -56,7 +58,7 @@ class DockItemViewController(
     }
 
     private enum class OptionalStates {
-        EXCITED, UPDATING
+        EXCITED, UPDATING, RESTRICTED, ACTIVE_MEDIA
     }
 
     private var dynamicIconStrokeColor: Int = defaultIconColor
@@ -83,28 +85,85 @@ class DockItemViewController(
     }
 
     /**
-     * Setter to set if the DockItem is excited.
+     * Setter to set if the DockItem is excited. Returns true if the state was changed.
      */
-    fun setExcited(isExcited: Boolean) {
+    fun setExcited(isExcited: Boolean): Boolean {
+        if ((isExcited && optionalState.contains(OptionalStates.EXCITED)) ||
+            (!isExcited && !optionalState.contains(OptionalStates.EXCITED))
+        ) {
+            return false
+        }
+
         if (isExcited) {
             optionalState.add(OptionalStates.EXCITED)
         } else {
             optionalState.remove(OptionalStates.EXCITED)
         }
+        return true
     }
 
     /**
      * Setter to set if the DockItem is updating to another [DockAppItem]
      * @param updatingColor color to use when app is updating. Generally the icon color of the next
      * [DockAppItem]
+     * @return Returns true if the state was changed, false otherwise
      */
-    fun setUpdating(isUpdating: Boolean, updatingColor: Int?) {
+    fun setUpdating(isUpdating: Boolean, updatingColor: Int?): Boolean {
+        if ((isUpdating && optionalState.contains(OptionalStates.UPDATING)) ||
+            (!isUpdating && !optionalState.contains(OptionalStates.UPDATING))
+        ) {
+            return false
+        }
+
         if (isUpdating) {
             optionalState.add(OptionalStates.UPDATING)
         } else {
             optionalState.remove(OptionalStates.UPDATING)
         }
         this.updatingColor = updatingColor ?: defaultIconColor
+        return true
+    }
+
+    /**
+     * Setter to set if the DockItem is restricted. Returns true if the state was changed.
+     */
+    fun setRestricted(isRestricted: Boolean): Boolean {
+        if ((isRestricted && optionalState.contains(OptionalStates.RESTRICTED)) ||
+            (!isRestricted && !optionalState.contains(OptionalStates.RESTRICTED))
+        ) {
+            return false
+        }
+
+        if (isRestricted) {
+            optionalState.add(OptionalStates.RESTRICTED)
+        } else {
+            optionalState.remove(OptionalStates.RESTRICTED)
+        }
+        return true
+    }
+
+    /** Tracks whether the app item has an active media session or not */
+    fun setHasActiveMediaSession(
+        hasMediaSession: Boolean
+    ): Boolean {
+        if ((hasMediaSession && optionalState.contains(OptionalStates.ACTIVE_MEDIA)) ||
+            (!hasMediaSession && !optionalState.contains(OptionalStates.ACTIVE_MEDIA))
+        ) {
+            return false
+        }
+
+        if (hasMediaSession) {
+            optionalState.add(OptionalStates.ACTIVE_MEDIA)
+        } else {
+            optionalState.remove(OptionalStates.ACTIVE_MEDIA)
+        }
+        return true
+    }
+
+    /** @return whether the view should be restricted or not */
+    fun shouldBeRestricted(): Boolean {
+        return optionalState.contains(OptionalStates.RESTRICTED) &&
+                !optionalState.contains(OptionalStates.ACTIVE_MEDIA)
     }
 
     /**
@@ -123,9 +182,11 @@ class DockItemViewController(
         }
         appIcon.strokeColor = ColorStateList.valueOf(getStrokeColor())
         appIcon.strokeWidth = getStrokeWidth()
-        val cp = getContentPadding()
-        appIcon.setContentPadding(cp, cp, cp, cp)
         appIcon.colorFilter = getColorFilter()
+        val cp = getContentPadding()
+        // ContentPadding should not be set before the measure phase of the view otherwise it might
+        // set incorrect padding values on the view.
+        appIcon.post { appIcon.setContentPadding(cp, cp, cp, cp) }
     }
 
     /**
@@ -178,6 +239,8 @@ class DockItemViewController(
     private fun getStrokeColor(): Int {
         if (optionalState.contains(OptionalStates.UPDATING)) {
             return updatingColor
+        } else if (shouldBeRestricted()) {
+            return restrictedIconStrokeColor
         } else if (optionalState.contains(OptionalStates.EXCITED)) {
             return excitedIconStrokeColor
         } else if (typeState == TypeStates.STATIC) {
@@ -206,6 +269,8 @@ class DockItemViewController(
     private fun getColorFilter(): ColorFilter? {
         if (optionalState.contains(OptionalStates.UPDATING)) {
             return PorterDuffColorFilter(updatingColor, PorterDuff.Mode.SRC_OVER)
+        } else if (shouldBeRestricted()){
+            return restrictedColorFilter
         } else if (optionalState.contains(OptionalStates.EXCITED)) {
             return excitedColorFilter
         }

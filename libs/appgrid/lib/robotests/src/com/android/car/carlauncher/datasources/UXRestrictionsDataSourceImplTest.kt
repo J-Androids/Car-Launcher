@@ -16,9 +16,11 @@
 package com.android.car.carlauncher.datasources
 
 import android.car.Car
+import android.car.content.pm.CarPackageManager
 import android.car.drivingstate.CarUxRestrictions
 import android.car.drivingstate.CarUxRestrictionsManager
 import android.car.testapi.FakeCar
+import android.media.session.MediaSessionManager
 import androidx.test.core.app.ApplicationProvider
 import java.lang.reflect.Field
 import junit.framework.TestCase.assertEquals
@@ -33,7 +35,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
@@ -76,7 +80,13 @@ class UXRestrictionsDataSourceImplTest {
     fun requiresDistractionOptimization_sendsRequired() =
         scope.runTest {
             val uxRestrictionDataSource =
-                UXRestrictionDataSourceImpl(carUxRestrictionsManager, bgDispatcher)
+                UXRestrictionDataSourceImpl(
+                    carUxRestrictionsManager,
+                    mock(CarPackageManager::class.java),
+                    mock(MediaSessionManager::class.java),
+                    RuntimeEnvironment.getApplication().resources,
+                    bgDispatcher
+                )
             val outputFlows = mutableListOf<Boolean>()
 
             launch(StandardTestDispatcher(testScheduler)) {
@@ -97,7 +107,13 @@ class UXRestrictionsDataSourceImplTest {
     @Test
     fun requiresDistractionOptimization_sendsNotRequired() = scope.runTest {
         val uxRestrictionDataSource =
-            UXRestrictionDataSourceImpl(carUxRestrictionsManager, bgDispatcher)
+            UXRestrictionDataSourceImpl(
+                carUxRestrictionsManager,
+                mock(CarPackageManager::class.java),
+                mock(MediaSessionManager::class.java),
+                RuntimeEnvironment.getApplication().resources,
+                bgDispatcher
+            )
         val outputFlows = mutableListOf<Boolean>()
 
         launch(StandardTestDispatcher(testScheduler)) {
@@ -118,7 +134,13 @@ class UXRestrictionsDataSourceImplTest {
     @Test
     fun requiresDistractionOptimization_scopeClosed_shouldCleanUp() = scope.runTest {
         val uxRestrictionDataSource =
-            UXRestrictionDataSourceImpl(carUxRestrictionsManager, bgDispatcher)
+            UXRestrictionDataSourceImpl(
+                carUxRestrictionsManager,
+                mock(CarPackageManager::class.java),
+                mock(MediaSessionManager::class.java),
+                RuntimeEnvironment.getApplication().resources,
+                bgDispatcher
+            )
         val outputFlows = mutableListOf<Boolean>()
 
         launch(StandardTestDispatcher(testScheduler)) {

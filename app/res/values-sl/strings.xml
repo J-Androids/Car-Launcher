@@ -35,4 +35,6 @@
     <string name="recents_clear_all_text" msgid="3594272268167720553">"Izbriši vse"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"Aplikacija ni na voljo"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"Umirjeni način"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"Čakalna vrsta"</string>
+    <string name="media_card_history_header_title" msgid="6753954322481732596">"Nadaljujte"</string>
 </resources>

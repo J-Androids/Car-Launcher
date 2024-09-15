@@ -64,32 +64,43 @@ public abstract class ProtoDataSource<T extends MessageLite> {
     }
 
     /**
-     * Writes the {@link MessageLite} subclass T to the file represented by this object.
+     * Writes the {@link MessageLite} subclass T to the file represented by this object in the
+     * background thread.
      */
-    public void writeToFile(T data) {
+    public void writeToFileInBackgroundThread(T data) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
-            try {
-                if (mOutputStream == null) {
-                    mOutputStream = new FileOutputStream(getDataFile(), false);
-                }
-                writeDelimitedTo(data, mOutputStream);
-            } catch (IOException e) {
-                Log.e(TAG, "Launcher item list not written to file successfully.");
-            } finally {
-                try {
-                    if (mOutputStream != null) {
-                        mOutputStream.flush();
-                        mOutputStream.getFD().sync();
-                        mOutputStream.close();
-                        mOutputStream = null;
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG, "Unable to close output stream. ");
-                }
-            }
+            writeToFile(data);
             executorService.shutdown();
         });
+    }
+
+    /**
+     * Writes the {@link MessageLite} subclass T to the file represented by this object.
+     */
+    public boolean writeToFile(T data) {
+        boolean success = true;
+        try {
+            if (mOutputStream == null) {
+                mOutputStream = new FileOutputStream(getDataFile(), false);
+            }
+            writeDelimitedTo(data, mOutputStream);
+        } catch (IOException e) {
+            Log.e(TAG, "Launcher item list not written to file successfully.");
+            success = false;
+        } finally {
+            try {
+                if (mOutputStream != null) {
+                    mOutputStream.flush();
+                    mOutputStream.getFD().sync();
+                    mOutputStream.close();
+                    mOutputStream = null;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to close output stream. ");
+            }
+        }
+        return success;
     }
 
     /**
@@ -123,6 +134,21 @@ public abstract class ProtoDataSource<T extends MessageLite> {
     }
 
     /**
+     * @return True if delete file was successful, false otherwise
+     */
+    public boolean deleteFile() {
+        boolean success = false;
+        try {
+            if (mFile.exists()) {
+                success = mFile.delete();
+            }
+        } catch (SecurityException ex) {
+            Log.e(TAG, "deleteFile - " + ex);
+        }
+        return success;
+    }
+
+    /**
      * This method will be called by {@link ProtoDataSource#readFromFile}.
      *
      * Implementation is left to subclass since {@link MessageLite.parseDelimitedFrom(InputStream)}
@@ -137,7 +163,8 @@ public abstract class ProtoDataSource<T extends MessageLite> {
     protected abstract T parseDelimitedFrom(InputStream inputStream) throws IOException;
 
     /**
-     * This method will be called by {@link ProtoDataSource#writeToFile(MessageLite)}.
+     * This method will be called by
+     * {@link ProtoDataSource#writeToFileInBackgroundThread(MessageLite)}.
      *
      * Implementation is left to subclass since {@link MessageLite#writeDelimitedTo(OutputStream)}
      * requires a defined class at compile time. Subclasses should implement this method by directly

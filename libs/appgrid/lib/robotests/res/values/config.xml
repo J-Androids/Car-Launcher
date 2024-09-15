@@ -35,4 +35,7 @@
         msg_mirroring_redirect_uri_key
     </string>
 
+    <!-- Launcher Apps to hide -->
+    <string-array name="hidden_apps" />
+
 </resources>

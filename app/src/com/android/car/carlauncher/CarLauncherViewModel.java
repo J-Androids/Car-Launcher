@@ -40,6 +40,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.core.util.Consumer;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
@@ -101,7 +102,15 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
         DefaultLifecycleObserver.super.onResume(owner);
-        mHostLifecycle.hostAppeared();
+        // Do not trigger 'hostAppeared()'}' in onResume.
+        // If the host Activity was hidden by an Activity, the Activity is moved to the other
+        // display, what the system expects would be the new moved Activity becomes the top one.
+        // But, at the time, the host Activity became visible and 'onResume()' is triggered.
+        // If 'hostAppeared()' is called in onResume, which moves the embeddedTask to the top and
+        // breaks the contract (the newly moved Activity becomes top).
+        // The contract is maintained by android.server.wm.multidisplay.MultiDisplayClientTests.
+        // BTW, if we don't invoke 'hostAppeared()', which makes the embedded task invisible if
+        // the host Activity gets the new Intent, so we'd call 'hostAppeared()' in onNewIntent.
     }
 
     @Override
@@ -121,6 +130,17 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
         mHostLifecycle.hostDestroyed();
         super.onCleared();
     }
+
+    public Consumer<Intent> getNewIntentListener() {
+        return mNewIntentConsumer;
+    }
+
+    private final Consumer<Intent> mNewIntentConsumer = new Consumer<Intent>() {
+        @Override
+        public void accept(Intent intent) {
+            mHostLifecycle.hostAppeared();
+        }
+    };
 
     private static final class ControlledRemoteCarTaskViewCallbackImpl implements
             ControlledRemoteCarTaskViewCallback {

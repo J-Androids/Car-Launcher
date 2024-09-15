@@ -55,7 +55,7 @@ import com.android.car.carlaunchercommon.shortcuts.ForceStopShortcutItem;
 import com.android.car.carlaunchercommon.shortcuts.PinShortcutItem;
 import com.android.car.dockutil.Flags;
 import com.android.car.dockutil.events.DockEventSenderHelper;
-import com.android.car.media.common.source.MediaSourceUtil;
+import com.android.car.media.common.source.MediaSource;
 import com.android.car.ui.shortcutspopup.CarUiShortcutsPopup;
 
 import com.google.common.collect.Sets;
@@ -170,7 +170,7 @@ public class AppLauncherUtils {
     private static final LauncherAppsInfo EMPTY_APPS_INFO = new LauncherAppsInfo(
             Collections.emptyMap(), Collections.emptyMap());
 
-    /*
+    /**
      * Gets the media source in a given package. If there are multiple sources in the package,
      * returns the first one.
      */
@@ -556,7 +556,7 @@ public class AppLauncherUtils {
                     return true;
                 }
                 // Only Keep MBS that is a media template
-                return new MediaSourceUtil(context).isMediaTemplate(componentName);
+                return MediaSource.isMediaTemplate(context, componentName);
             // Process activities
             case APP_TYPE_LAUNCHABLES:
                 return true;

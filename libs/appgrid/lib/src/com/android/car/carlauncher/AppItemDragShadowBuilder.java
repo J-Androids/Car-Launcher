@@ -18,24 +18,28 @@ package com.android.car.carlauncher;
 
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 /**
  * Custom View.DragShadowBuilder that handles the drawing and deploying of drag shadow when an
  * app icon is long pressed and dragged.
  */
 public class AppItemDragShadowBuilder extends View.DragShadowBuilder{
-    private final View mAppIcon;
-    private final int mSize;
+    private final Drawable mIcon;
     private final int mScaledSize;
     private final float mTouchPointX;
     private final float mTouchPointY;
 
-    public AppItemDragShadowBuilder(View view, float touchPointX, float touchPointY,
-            int size, int scaledSize) {
-        super(view);
-        mAppIcon = view;
-        mSize = size;
+    /**
+     * @param icon Drawable to be drawn as the drag shadow to represent the view being dragged.
+     */
+    public AppItemDragShadowBuilder(Drawable icon, float touchPointX, float touchPointY,
+            int scaledSize) {
+        super();
+        mIcon = icon;
         mScaledSize = scaledSize;
         mTouchPointX = touchPointX;
         mTouchPointY = touchPointY;
@@ -43,16 +47,13 @@ public class AppItemDragShadowBuilder extends View.DragShadowBuilder{
 
     @Override
     public void onProvideShadowMetrics(Point outShadowSize, Point outShadowTouchPoint) {
-        if (mAppIcon != null) {
-            outShadowSize.set(mScaledSize, mScaledSize);
-            outShadowTouchPoint.set((int) mTouchPointX, (int) mTouchPointY);
-        }
+        outShadowSize.set(mScaledSize, mScaledSize);
+        outShadowTouchPoint.set((int) mTouchPointX, (int) mTouchPointY);
     }
 
     @Override
-    public void onDrawShadow(Canvas canvas) {
-        canvas.scale(/* scaleX */ mScaledSize / (float) mSize,
-                /* scaleY */  mScaledSize / (float) mSize);
-        getView().draw(canvas);
+    public void onDrawShadow(@NonNull Canvas canvas) {
+        mIcon.setBounds(0, 0, mScaledSize, mScaledSize);
+        mIcon.draw(canvas);
     }
 }

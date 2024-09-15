@@ -196,7 +196,7 @@ public class AppOrderController implements DataSourceController {
                 msgList.add(currentItems.get(i).convertToMessage(i, -1));
             }
             LauncherItemListMessage appOrderListMessage = mItemHelper.convertToMessage(msgList);
-            mDataSource.writeToFile(appOrderListMessage);
+            mDataSource.writeToFileInBackgroundThread(appOrderListMessage);
         }
     }
 

@@ -27,12 +27,14 @@
     <string name="projected_launch_text" msgid="5034079820478748609">"Запусціць Android Auto"</string>
     <string name="projected_onclick_launch_error_toast_text" msgid="8853804785626030351">"Не ўдалося запусціць Android Auto. Дзеянні не знойдзены."</string>
     <string name="projection_devices" msgid="2556503818120676439">"{count,plural, =1{# прылада}one{# прылада}few{# прылады}many{# прылад}other{# прылады}}"</string>
-    <string name="weather_app_name" msgid="4356705068077942048">"Надвор\'е"</string>
+    <string name="weather_app_name" msgid="4356705068077942048">"Надвор’е"</string>
     <string name="fake_weather_main_text" msgid="2545755284647327839">"--°, пераважна сонечна"</string>
-    <string name="fake_weather_footer_text" msgid="8640814250285014485">"Маўтын-В\'ю • макс.: --°, мін.: --°"</string>
+    <string name="fake_weather_footer_text" msgid="8640814250285014485">"Маўтын-В’ю • макс.: --°, мін.: --°"</string>
     <string name="times_separator" msgid="1962841895013564645">"/"</string>
     <string name="recents_empty_state_text" msgid="8228569970506899117">"Няма нядаўніх элементаў"</string>
     <string name="recents_clear_all_text" msgid="3594272268167720553">"Ачысціць усё"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"Праграма недаступная"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"Рэжым спакою"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"Чарга"</string>
+    <string name="media_card_history_header_title" msgid="6753954322481732596">"Узнавіць"</string>
 </resources>

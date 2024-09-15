@@ -42,18 +42,12 @@
         app:layout_constraintEnd_toStartOf="@id/temperature_icon"
         app:layout_constraintHorizontal_chainStyle="packed" />
 
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/temperature_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="temperature_icon,temperature" />
-
     <TextView
         android:id="@+id/temperature_icon"
         style="@style/CalmModeText.Temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/temperature"
         app:layout_constraintStart_toEndOf="@id/date"
         app:layout_constraintEnd_toStartOf="@id/temperature"
@@ -64,23 +58,18 @@
         style="@style/CalmModeText.Temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/calm_mode_padding_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/temperature_icon"
         app:layout_constraintEnd_toStartOf="@id/nav_state_icon" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/nav_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="nav_state_icon,nav_state" />
 
     <ImageView
         android:id="@+id/nav_state_icon"
         style="@style/CalmModeIcon"
         android:layout_width="@dimen/calm_mode_icon_size_regular"
         android:layout_height="@dimen/calm_mode_icon_size_regular"
+        android:visibility="gone"
         android:layout_marginStart="@dimen/calm_mode_icon_margin"
         android:layout_marginEnd="@dimen/calm_mode_icon_margin"
         android:src="@drawable/ic_navigation"
@@ -94,6 +83,7 @@
         style="@style/CalmModeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/calm_mode_padding_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/nav_state_icon"
@@ -115,6 +105,7 @@
         style="@style/CalmModeText.MediaTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/calm_mode_clock_media_title_margin"
         app:layout_constraintTop_toBottomOf="@id/clock"
         app:layout_constraintEnd_toEndOf="parent"
