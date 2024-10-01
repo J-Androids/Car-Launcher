@@ -23,7 +23,6 @@ import static com.android.car.media.common.ui.PlaybackCardControllerUtilities.up
 
 import static java.lang.Integer.max;
 
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -63,7 +62,7 @@ public class MediaCardController extends PlaybackCardController implements
     private static final int SWIPE_MAX_OFF_PATH = 75;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
-    private final MediaIntentRouter mMediaIntentRouter = MediaIntentRouter.getInstance();
+    private final MediaLaunchRouter mMediaLaunchRouter = MediaLaunchRouter.getInstance();
     private Resources mViewResources;
     private View mPanelHandlebar;
     private LinearLayout mPanel;
@@ -442,9 +441,7 @@ public class MediaCardController extends PlaybackCardController implements
         if (mCardViewModel.getPanelExpanded()) {
             animateClosePanel();
         } else {
-            MediaSource mediaSource = mDataModel.getMediaSource().getValue();
-            Intent intent = mediaSource != null ? mediaSource.getIntent() : null;
-            mMediaIntentRouter.handleMediaIntent(intent);
+            mMediaLaunchRouter.handleLaunchMedia(mDataModel.getMediaSource().getValue());
         }
     }
 

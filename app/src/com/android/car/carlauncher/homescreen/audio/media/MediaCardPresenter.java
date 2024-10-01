@@ -16,8 +16,6 @@
 
 package com.android.car.carlauncher.homescreen.audio.media;
 
-import android.content.Intent;
-
 import androidx.annotation.VisibleForTesting;
 
 import com.android.car.carlauncher.homescreen.CardPresenter;
@@ -37,7 +35,7 @@ import java.util.List;
  */
 public class MediaCardPresenter extends CardPresenter {
 
-    public final MediaIntentRouter mMediaIntentRouter = MediaIntentRouter.getInstance();
+    public final MediaLaunchRouter mMediaLaunchRouter = MediaLaunchRouter.getInstance();
 
     private MediaViewModel mViewModel;
     private MediaCardFragment mFragment;
@@ -49,8 +47,7 @@ public class MediaCardPresenter extends CardPresenter {
             new HomeCardFragment.OnViewClickListener() {
                 @Override
                 public void onViewClicked() {
-                    Intent intent = mViewModel.getIntent();
-                    mMediaIntentRouter.handleMediaIntent(intent);
+                    mMediaLaunchRouter.handleLaunchMedia(mViewModel.getMediaSource());
                 }
             };
 

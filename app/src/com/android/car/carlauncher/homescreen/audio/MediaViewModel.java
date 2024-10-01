@@ -205,6 +205,10 @@ public class MediaViewModel extends AndroidViewModel implements AudioModel {
         return mediaSource != null ? mediaSource.getIntent() : null;
     }
 
+    public MediaSource getMediaSource() {
+        return getMediaSourceViewModel().getPrimaryMediaSource().getValue();
+    }
+
     @Override
     public void setOnModelUpdateListener(OnModelUpdateListener onModelUpdateListener) {
         mOnModelUpdateListener = onModelUpdateListener;
