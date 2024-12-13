@@ -18,9 +18,9 @@ package com.android.car.carlauncher.recents;
 
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 
-import static com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_FREEFORM;
-import static com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_SINGLE;
-import static com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_SPLIT;
+import static com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_FREEFORM;
+import static com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SINGLE;
+import static com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SPLIT;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -49,7 +49,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.wm.shell.recents.IRecentTasks;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 
 import com.google.common.annotations.VisibleForTesting;
 

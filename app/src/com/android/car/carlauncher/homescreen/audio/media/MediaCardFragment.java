@@ -41,8 +41,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.car.apps.common.BitmapUtils;
 import com.android.car.carlauncher.Flags;
+import com.android.car.carlauncher.MediaSessionUtils;
 import com.android.car.carlauncher.R;
 import com.android.car.carlauncher.homescreen.HomeCardFragment;
+import com.android.car.carlauncher.homescreen.HomeCardInterface;
 import com.android.car.carlauncher.homescreen.audio.MediaViewModel;
 import com.android.car.carlauncher.homescreen.ui.CardContent;
 import com.android.car.carlauncher.homescreen.ui.DescriptiveTextWithControlsView;
@@ -140,7 +142,7 @@ public class MediaCardFragment extends HomeCardFragment {
         } else {
             mViewModel = new ViewModelProvider(requireActivity()).get(MediaCardViewModel.class);
             if (mViewModel.needsInitialization()) {
-                MediaModels models = new MediaModels(getActivity());
+                MediaModels models = MediaSessionUtils.getMediaModels(getContext());
                 mViewModel.init(models);
             }
         }

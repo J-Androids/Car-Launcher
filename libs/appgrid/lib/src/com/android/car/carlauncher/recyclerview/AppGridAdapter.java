@@ -29,12 +29,11 @@ import android.widget.LinearLayout;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.carlauncher.AppGridActivity.Mode;
+import com.android.car.carlauncher.AppGridFragment.Mode;
 import com.android.car.carlauncher.AppGridPageSnapper;
 import com.android.car.carlauncher.AppItem;
 import com.android.car.carlauncher.LauncherItem;
 import com.android.car.carlauncher.LauncherItemDiffCallback;
-import com.android.car.carlauncher.LauncherViewModel;
 import com.android.car.carlauncher.R;
 import com.android.car.carlauncher.RecentAppsRowViewHolder;
 import com.android.car.carlauncher.pagination.PageIndexingHelper;
@@ -70,41 +69,6 @@ public class AppGridAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Mode mAppGridMode;
 
     private AppGridAdapterListener mAppGridAdapterListener;
-
-    public AppGridAdapter(Context context, int numOfCols, int numOfRows,
-            LauncherViewModel launcherViewModel, AppItemViewHolder.AppItemDragCallback dragCallback,
-            AppGridPageSnapper.AppGridPageSnapCallback snapCallback) {
-        this(context, numOfCols, numOfRows,
-                context.getResources().getBoolean(R.bool.use_vertical_app_grid)
-                        ? PageOrientation.VERTICAL : PageOrientation.HORIZONTAL,
-                LayoutInflater.from(context), launcherViewModel, dragCallback, snapCallback);
-    }
-
-    public AppGridAdapter(Context context, int numOfCols, int numOfRows,
-            @PageOrientation int pageOrientation,
-            LayoutInflater layoutInflater, LauncherViewModel launcherViewModel,
-            AppItemViewHolder.AppItemDragCallback dragCallback,
-            AppGridPageSnapper.AppGridPageSnapCallback snapCallback) {
-        this(context, numOfCols, numOfRows, pageOrientation, layoutInflater,
-                launcherViewModel, dragCallback, snapCallback, Mode.ALL_APPS);
-    }
-
-    public AppGridAdapter(Context context, int numOfCols, int numOfRows,
-            @PageOrientation int pageOrientation,
-            LayoutInflater layoutInflater, LauncherViewModel launcherViewModel,
-            AppItemViewHolder.AppItemDragCallback dragCallback,
-            AppGridPageSnapper.AppGridPageSnapCallback snapCallback, Mode mode) {
-        mContext = context;
-        mInflater = layoutInflater;
-        mNumOfCols = numOfCols;
-        mNumOfRows = numOfRows;
-        mDragCallback = dragCallback;
-        mSnapCallback = snapCallback;
-
-        mIndexingHelper = new PageIndexingHelper(numOfCols, numOfRows, pageOrientation);
-        mGridOrderedLauncherItems = new ArrayList<>();
-        mAppGridMode = mode;
-    }
 
     public AppGridAdapter(Context context, int numOfCols, int numOfRows,
             AppItemViewHolder.AppItemDragCallback dragCallback,

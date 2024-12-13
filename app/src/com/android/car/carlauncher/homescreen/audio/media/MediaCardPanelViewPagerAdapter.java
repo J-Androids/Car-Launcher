@@ -16,6 +16,10 @@
 
 package com.android.car.carlauncher.homescreen.audio.media;
 
+import static com.android.car.carlauncher.homescreen.audio.media.MediaCardPanelViewPagerAdapter.Tab.HistoryTab;
+import static com.android.car.carlauncher.homescreen.audio.media.MediaCardPanelViewPagerAdapter.Tab.OverflowTab;
+import static com.android.car.carlauncher.homescreen.audio.media.MediaCardPanelViewPagerAdapter.Tab.QueueTab;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -47,8 +51,14 @@ public class MediaCardPanelViewPagerAdapter extends
     private boolean mHasQueue;
     private ViewPagerQueueCreator mQueueCreator;
     private ViewPagerHistoryCreator mHistoryCreator;
+
+    private boolean mHasOverflow;
     private PlaybackStateWrapper mPlaybackState;
     private PlaybackController mPlaybackController;
+    private List<PlaybackViewModel.RawCustomPlaybackAction> mCustomActionsToExclude =
+            new ArrayList<PlaybackViewModel.RawCustomPlaybackAction>();
+
+    enum Tab { OverflowTab, QueueTab, HistoryTab };
 
     public MediaCardPanelViewPagerAdapter(Context context) {
         this.mContext = context;
@@ -66,53 +76,30 @@ public class MediaCardPanelViewPagerAdapter extends
         TableLayout overflowGrid = holder.itemView.findViewById(R.id.overflow_grid);
         FrameLayout queue = holder.itemView.findViewById(R.id.queue_list_container);
         FrameLayout history = holder.itemView.findViewById(R.id.history_list_container);
-        if (mHasQueue) {
-            switch(position) {
-                case 0: {
-                    updateCustomActionsWithPlaybackState(holder.itemView);
-                    overflowGrid.setVisibility(View.VISIBLE);
-                    queue.setVisibility(View.GONE);
-                    history.setVisibility(View.GONE);
-                    break;
-                }
-                case 1: {
-                    mQueueCreator.createQueueController(queue);
-                    queue.setVisibility(View.VISIBLE);
-                    overflowGrid.setVisibility(View.GONE);
-                    history.setVisibility(View.GONE);
-                    break;
-                }
-                case 2: {
-                    mHistoryCreator.createHistoryController(history);
-                    history.setVisibility(View.VISIBLE);
-                    overflowGrid.setVisibility(View.GONE);
-                    queue.setVisibility(View.GONE);
-                    break;
-                }
+
+        Tab tab = getTab(position);
+        switch (tab) {
+            case OverflowTab: {
+                updateCustomActionsWithPlaybackState(holder.itemView);
+                break;
             }
-        } else {
-            switch(position) {
-                case 0: {
-                    updateCustomActionsWithPlaybackState(holder.itemView);
-                    overflowGrid.setVisibility(View.VISIBLE);
-                    queue.setVisibility(View.GONE);
-                    history.setVisibility(View.GONE);
-                    break;
-                }
-                case 1: {
-                    mHistoryCreator.createHistoryController(history);
-                    history.setVisibility(View.VISIBLE);
-                    overflowGrid.setVisibility(View.GONE);
-                    queue.setVisibility(View.GONE);
-                    break;
-                }
+            case QueueTab: {
+                mQueueCreator.createQueueController(queue);
+                break;
+            }
+            case HistoryTab: {
+                mHistoryCreator.createHistoryController(history);
+                break;
             }
         }
+        overflowGrid.setVisibility(tab == OverflowTab ? View.VISIBLE : View.GONE);
+        queue.setVisibility(tab == QueueTab ? View.VISIBLE : View.GONE);
+        history.setVisibility(tab == HistoryTab ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public int getItemCount() {
-        return mHasQueue ? 3 : 2;
+        return mHasQueue && mHasOverflow ? 3 : (!mHasQueue && !mHasOverflow ? 1 : 2);
     }
 
     /** Notify ViewHolder to rebind when a media source queue status changes */
@@ -129,12 +116,25 @@ public class MediaCardPanelViewPagerAdapter extends
         mHistoryCreator = historyCreator;
     }
 
+    /** Notify ViewHolder to rebind when a media source overflow status changes */
+    public void setHasOverflow(boolean hasOverflow) {
+        if (mHasOverflow != hasOverflow) {
+            mHasOverflow = hasOverflow;
+            notifyDataSetChanged();
+        }
+    }
+
     /** Notify a change in playback state so ViewHolder binds with latest update */
     public void notifyPlaybackStateChanged(PlaybackStateWrapper playbackState,
-            PlaybackController playbackController) {
+            PlaybackController playbackController,
+            List<PlaybackViewModel.RawCustomPlaybackAction> customActionsToExclude) {
         mPlaybackState = playbackState;
         mPlaybackController = playbackController;
-        notifyItemChanged(0);
+        mCustomActionsToExclude.clear();
+        mCustomActionsToExclude.addAll(customActionsToExclude);
+        if (mHasOverflow) {
+            notifyItemChanged(0);
+        }
     }
 
     private void updateCustomActionsWithPlaybackState(View itemView) {
@@ -145,6 +145,7 @@ public class MediaCardPanelViewPagerAdapter extends
         List<PlaybackViewModel.RawCustomPlaybackAction> customActions = mPlaybackState == null
                 ? new ArrayList<PlaybackViewModel.RawCustomPlaybackAction>()
                 : mPlaybackState.getCustomActions();
+        customActions.removeAll(mCustomActionsToExclude);
         List<ImageButton> actionsToFill = new ArrayList<>();
         for (int i = 0; i < actions.size(); i++) {
             ImageButton button = actions.get(i);
@@ -182,6 +183,25 @@ public class MediaCardPanelViewPagerAdapter extends
                 break;
             }
         }
+    }
+
+    private Tab getTab(int index) {
+        if (index == getQueueTabIndex()) {
+            return QueueTab;
+        } else if (index == getOverflowTabIndex()) {
+            return OverflowTab;
+        } else {
+            return HistoryTab;
+        }
+    }
+
+    private int getQueueTabIndex() {
+        if (!mHasQueue) return -1;
+        return getOverflowTabIndex() + 1;
+    }
+
+    private int getOverflowTabIndex() {
+        return mHasOverflow ? 0 : -1;
     }
 
     static class PanelViewHolder extends RecyclerView.ViewHolder {

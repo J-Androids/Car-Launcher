@@ -17,7 +17,7 @@
 package com.android.car.carlauncher.recents;
 
 import static com.android.car.carlauncher.recents.CarRecentsActivity.OPEN_RECENT_TASK_ACTION;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.app.ActivityManager;
 import android.app.Service;
@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.wm.shell.recents.IRecentTasks;
 
@@ -161,6 +162,11 @@ public class CarQuickStepService extends Service {
         }
 
         @Override
+        public void onTransitionModeUpdated(int barMode, boolean checkBarModes) {
+            // no-op
+        }
+
+        @Override
         public void onNavButtonsDarkIntensityChanged(float darkIntensity) {
             // no-op
         }
@@ -177,6 +183,37 @@ public class CarQuickStepService extends Service {
 
         @Override
         public void onTaskbarToggled() {
+            // no-op
+        }
+
+        @Override
+        public void updateWallpaperVisibility(int displayId, boolean visible) {
+            // no-op
+        }
+
+        @Override
+        public void checkNavBarModes() {
+            // no-op
+        }
+
+        @Override
+        public void finishBarAnimations() {
+            // no-op
+        }
+
+        @Override
+        public void touchAutoDim(boolean reset) {
+            // no-op
+        }
+
+        @Override
+        public void transitionTo(@BarTransitions.TransitionMode int barMode,
+                boolean animate) {
+            // no-op
+        }
+
+        @Override
+        public void appTransitionPending(boolean pending) {
             // no-op
         }
     }

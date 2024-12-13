@@ -15,7 +15,7 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/car_surface"
+    <item android:color="@color/car_surface_container_highest"
         android:state_selected="false"/>
     <item android:color="@color/car_on_surface"
         android:state_selected="true"/>

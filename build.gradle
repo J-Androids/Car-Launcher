@@ -30,7 +30,7 @@ buildscript {
     gradle.ext.lib_car_test_api = gradle.ext.prebuiltSdkPath + gradle.ext.aaosLatestSDK + "/system/android.car.testapi.jar"
     gradle.ext.debugCertPath = gradle.ext.repoRootPath + "/packages/apps/Car/Launcher/libs/appgrid/keys/com_android_car_launcher_test.jks"
     gradle.ext.soongBash = gradle.ext.repoRootPath + "/build/soong/soong_ui.bash"
-    gradle.ext.platformSdkVersion = "34" // Change this to the most recent android API level.
+    gradle.ext.platformSdkVersion = "35" // Change this to the most recent android API level.
 
     if (file(gradle.ext.soongBash).exists()) {
         def soongPlatformSdkVersion = (gradle.ext.soongBash + " --dumpvar-mode PLATFORM_SDK_VERSION").execute().text.trim()
