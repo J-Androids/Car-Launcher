@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package com.android.car.docklib.data;
+
+option java_package = "com.android.car.docklib";
+option java_outer_classname = "DockItemProto";
+
+message DockAppItemMessage {
+  required int32 relativePosition = 1;
+  required string package_name = 2;
+  required string class_name = 3;
+}
+
+message DockAppItemListMessage {
+  repeated DockAppItemMessage dockAppItemMessage = 1;
+}

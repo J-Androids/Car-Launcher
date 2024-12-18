@@ -1,0 +1,109 @@
+
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="@dimen/media_card_history_item_height"
+    android:layout_width="match_parent"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:contentPaddingLeft="@dimen/media_card_horizontal_margin"
+    app:contentPaddingRight="@dimen/media_card_horizontal_margin">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/history_card_container_active"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <TextView
+            android:id="@+id/history_card_title_active"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textAppearance="@style/TextAppearance.Car.Body.Small"
+            android:textColor="@color/car_text_primary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginEnd="@dimen/media_card_view_separation_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/history_card_album_art"
+            app:layout_constraintTop_toTopOf="@id/history_card_album_art"
+            app:layout_constraintBottom_toTopOf="@id/history_card_subtitle_active"
+            app:layout_constraintHorizontal_bias="0"/>
+        <TextView
+            android:id="@+id/history_card_subtitle_active"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textAppearance="@style/TextAppearance.Car.Body.Small"
+            android:textColor="@color/car_text_secondary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="@dimen/media_card_view_separation_margin"
+            android:layout_marginEnd="@dimen/media_card_view_separation_margin"
+            app:layout_constraintStart_toEndOf="@id/history_card_app_thumbnail"
+            app:layout_constraintEnd_toStartOf="@id/history_card_album_art"
+            app:layout_constraintTop_toBottomOf="@id/history_card_title_active"
+            app:layout_constraintBottom_toBottomOf="@id/history_card_album_art"
+            app:layout_constraintHorizontal_bias="0"/>
+        <ImageView
+            android:id="@+id/history_card_album_art"
+            android:layout_width="@dimen/media_card_history_item_icon_size"
+            android:layout_height="@dimen/media_card_history_item_icon_size"
+            android:background="@drawable/radius_8_background"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+        <ImageView
+            android:id="@+id/history_card_app_thumbnail"
+            android:layout_width="@dimen/media_card_history_item_thumbnail_size"
+            android:layout_height="@dimen/media_card_history_item_thumbnail_size"
+            android:background="@drawable/radius_16_background"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="@id/history_card_subtitle_active"
+            app:layout_constraintBottom_toBottomOf="@id/history_card_subtitle_active"
+            app:layout_constraintStart_toStartOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/history_card_container_inactive"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <TextView
+            android:id="@+id/history_card_app_title_inactive"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:textAppearance="@style/TextAppearance.Car.Body.Small"
+            android:textColor="@color/car_text_primary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginEnd="@dimen/media_card_view_separation_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/history_item_app_icon_inactive"
+            app:layout_constraintTop_toTopOf="@id/history_item_app_icon_inactive"
+            app:layout_constraintBottom_toBottomOf="@id/history_item_app_icon_inactive"
+            app:layout_constraintHorizontal_bias="0"/>
+        <ImageView
+            android:id="@+id/history_item_app_icon_inactive"
+            android:layout_width="@dimen/media_card_history_item_icon_size"
+            android:layout_height="@dimen/media_card_history_item_icon_size"
+            android:background="@drawable/radius_16_background"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

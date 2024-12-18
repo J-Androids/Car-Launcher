@@ -29,7 +29,7 @@
     <dimen name="main_screen_widget_margin">16dp</dimen>
 
     <!-- Card dimensions -->
-    <dimen name="card_width">388dp</dimen>
+    <dimen name="card_width">400dp</dimen>
 
     <!-- Card Header dimensions -->
     <dimen name="card_content_margin">24dp</dimen>
@@ -96,4 +96,47 @@
     <dimen name="calm_mode_text_size">24sp</dimen>
     <dimen name="calm_mode_clock_translationY">40dp</dimen>
     <dimen name="calm_mode_clock_media_title_margin">-16dp</dimen>
+
+    <!-- Home fullscreen media card dimens -->
+    <dimen name="media_card_large_button_icon_padding">25dp</dimen>
+    <dimen name="media_card_panel_button_icon_padding">12dp</dimen>
+    <dimen name="media_card_app_icon_size">32dp</dimen>
+    <dimen name="media_card_horizontal_margin">32dp</dimen>
+    <dimen name="media_card_view_separation_margin">16dp</dimen>
+    <dimen name="media_card_artist_top_margin">4dp</dimen>
+    <dimen name="media_card_album_art_size">200dp</dimen>
+    <dimen name="media_card_album_art_end_margin">96dp</dimen>
+    <item name="media_card_album_art_drawable_corner_ratio" format="float" type="dimen">0.08</item>
+    <dimen name="media_card_logo_size">32dp</dimen>
+    <dimen name="media_card_small_button_size">40dp</dimen>
+    <dimen name="media_card_large_button_size">80dp</dimen>
+    <dimen name="media_card_bottom_panel_button_size">56dp</dimen>
+    <dimen name="media_card_bottom_panel_height">96dp</dimen>
+    <dimen name="media_card_card_radius">32dp</dimen>
+    <dimen name="media_card_play_button_bottom_margin">120dp</dimen>
+    <dimen name="media_card_play_button_horizontal_margin">8dp</dimen>
+    <dimen name="media_card_margin_panel_open">24dp</dimen>
+    <dimen name="media_card_bottom_panel_margin_top">208dp</dimen>
+    <dimen name="media_card_bottom_panel_animated_final_position">128dp</dimen>
+    <dimen name="media_card_panel_handlebar_offscreen_start_position">1000dp</dimen>
+    <dimen name="media_card_bottom_panel_animated_size">@dimen/media_card_bottom_panel_button_size</dimen>
+    <dimen name="media_card_bottom_panel_animated_horizontal_margin">0dp</dimen>
+    <dimen name="media_card_pill_radius">160dp</dimen>
+    <dimen name="media_card_panel_handlebar_height">8dp</dimen>
+    <dimen name="media_card_panel_handlebar_touch_target_height">60dp</dimen>
+    <dimen name="media_card_panel_handlebar_horizontal_padding">164dp</dimen>
+    <dimen name="media_card_queue_header_app_icon_size">26dp</dimen>
+    <dimen name="media_card_queue_item_thumbnail_size">80dp</dimen>
+    <dimen name="media_card_panel_content_margin_top">216dp</dimen>
+    <dimen name="media_card_title_animated_line_height">36dp</dimen>
+    <dimen name="media_card_title_default_line_height">40dp</dimen>
+    <dimen name="media_card_title_animated_text_size">28sp</dimen>
+    <dimen name="media_card_title_default_text_size">32sp</dimen>
+    <dimen name="media_card_recycler_view_fading_edge_length">80dp</dimen>
+    <dimen name="media_card_history_item_height">112dp</dimen>
+    <dimen name="media_card_history_item_vertical_margin">16dp</dimen>
+    <dimen name="media_card_history_item_icon_size">80dp</dimen>
+    <dimen name="media_card_history_item_thumbnail_size">32dp</dimen>
+    <dimen name="media_card_view_header_icon_size">32dp</dimen>
+    <dimen name="media_card_text_view_guideline_start">248dp</dimen>
 </resources>

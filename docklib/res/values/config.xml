@@ -22,14 +22,14 @@
     <!-- A list of components that are shown on Dock by default -->
     <string-array name="config_defaultDockApps" translatable="false">
         <item>com.android.car.settings/com.android.car.settings.Settings_Launcher_Homepage</item>
+        <item>com.android.car.radio/com.android.car.radio.service.RadioAppService</item>
         <item>com.android.car.dialer/com.android.car.dialer.ui.TelecomActivity</item>
-        <item>com.android.contacts/com.android.contacts.activities.PeopleActivity</item>
-        <item>com.android.car.messenger/com.android.car.messenger.ui.launcher.MessageLauncherActivity</item>
     </string-array>
 
     <!-- A list of components that are excluded from being shown on Dock -->
     <string-array name="config_packagesExcludedFromDock" translatable="false">
         <item>com.android.car.carlauncher</item>
+        <item>android.car.usb.handler</item>
     </string-array>
 
     <!-- A list of components that are excluded from being shown on Dock -->
@@ -37,6 +37,9 @@
         <item>com.google.android.apps.maps/com.google.android.apps.gmm.car.embedded.activity.LimitedMapsActivity</item>
         <item>com.google.android.carassistant/com.google.android.libraries.assistant.auto.tng.assistant.ui.activity.AutoAssistantActivity</item>
         <item>com.android.car.media/com.android.car.media.MediaDispatcherActivity</item>
+        <item>com.android.car.media/com.android.car.media.MediaBlockingActivity</item>
+        <item>com.android.systemui/com.android.systemui.car.wm.activity.LaunchOnPrivateDisplayRouterActivity</item>
+        <item>com.android.car.settings/com.android.car.settings.sound.AudioRouteSelectionActivity</item>
     </string-array>
 
     <!--

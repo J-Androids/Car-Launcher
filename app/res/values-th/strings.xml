@@ -35,4 +35,6 @@
     <string name="recents_clear_all_text" msgid="3594272268167720553">"ล้างทั้งหมด"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"แอปไม่พร้อมใช้งาน"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"โหมด Calm"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"คิว"</string>
+    <string name="media_card_history_header_title" msgid="8337396297165848931">"แหล่งที่มาของสื่อ"</string>
 </resources>

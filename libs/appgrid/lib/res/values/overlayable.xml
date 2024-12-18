@@ -23,6 +23,7 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="bool" name="car_app_show_recent_apps"/>
       <item type="bool" name="car_app_show_toolbar"/>
       <item type="bool" name="config_allow_reordering"/>
+      <item type="bool" name="config_enableMediaSessionAppsWhileDriving"/>
       <item type="bool" name="use_defined_app_grid_dimensions"/>
       <item type="bool" name="use_vertical_app_grid"/>
       <item type="color" name="app_item_on_hover_background_color"/>
@@ -87,6 +88,7 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="id" name="banner_title"/>
       <item type="id" name="divider"/>
       <item type="id" name="focus_area"/>
+      <item type="id" name="fragmentContainer"/>
       <item type="id" name="page_indicator"/>
       <item type="id" name="page_indicator_container"/>
       <item type="id" name="recent_apps_row"/>
@@ -106,7 +108,8 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="integer" name="ms_scrollbar_appear_animation_duration"/>
       <item type="integer" name="ms_scrollbar_fade_animation_delay"/>
       <item type="integer" name="ms_scrollbar_fade_animation_duration"/>
-      <item type="layout" name="app_grid_activity"/>
+      <item type="layout" name="app_grid_container_activity"/>
+      <item type="layout" name="app_grid_fragment"/>
       <item type="layout" name="app_item"/>
       <item type="layout" name="banner"/>
       <item type="layout" name="recent_apps_row"/>
@@ -120,7 +123,6 @@ REGENERATE USING packages/apps/Car/libs/tools/rro/generate-overlayable.py
       <item type="string" name="config_msg_mirroring_redirect_uri_key"/>
       <item type="string" name="config_msg_mirroring_service_class_name"/>
       <item type="string" name="config_msg_mirroring_service_pkg_name"/>
-      <item type="string" name="driving_toast_text"/>
       <item type="string" name="hide_debug_apps"/>
       <item type="string" name="reset_appgrid_dialogue_message"/>
       <item type="string" name="reset_appgrid_title"/>

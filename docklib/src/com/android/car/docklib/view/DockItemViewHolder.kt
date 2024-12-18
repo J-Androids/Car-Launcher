@@ -20,6 +20,8 @@ import android.car.media.CarMediaManager
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Point
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -36,11 +38,14 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
+/**
+ * ViewHolder of {@link DockAppItem}
+ */
 class DockItemViewHolder(
         private val dockController: DockInterface,
         itemView: View,
         private val userContext: Context,
-        private val carMediaManager: CarMediaManager?,
+        private val carMediaManager: CarMediaManager?
 ) : RecyclerView.ViewHolder(itemView) {
 
     companion object {
@@ -68,7 +73,7 @@ class DockItemViewHolder(
     private val iconColorExecutor = Executors.newSingleThreadExecutor()
     private val dockDragListener: DockDragListener
     private val dockItemViewController: DockItemViewController
-    private var dockItem: DockAppItem? = null
+    private var dockItemClickListener: DockItemClickListener? = null
     private var dockItemLongClickListener: DockItemLongClickListener? = null
     private var droppedIconColor: Int = defaultIconColor
     private var iconColorFuture: Future<Int>? = null
@@ -96,10 +101,17 @@ class DockItemViewHolder(
                 R.color.icon_excited_stroke_color,
                 null // theme
             ),
+            restrictedIconStrokeColor = itemView.resources.getColor(
+                R.color.icon_restricted_stroke_color,
+                null // theme
+            ),
             defaultIconColor,
             excitedColorFilter = PorterDuffColorFilter(
                 Color.argb(excitedIconColorFilterAlpha, 0f, 0f, 0f),
                 PorterDuff.Mode.DARKEN
+            ),
+            restrictedColorFilter = ColorMatrixColorFilter(
+                    ColorMatrix().apply { setSaturation(0f) }
             ),
             excitedIconColorFilterAlpha,
             exciteAnimationDuration = itemView.resources
@@ -131,11 +143,12 @@ class DockItemViewHolder(
                                 MAX_WAIT_TO_COMPUTE_ICON_COLOR_MS,
                                 TimeUnit.MILLISECONDS
                         ) ?: defaultIconColor
-                        dockItemViewController.setUpdating(
+                        if (dockItemViewController.setUpdating(
                             isUpdating = true,
                             updatingColor = droppedIconColor
-                        )
-                        dockItemViewController.updateViewBasedOnState(appIcon)
+                        )) {
+                            dockItemViewController.updateViewBasedOnState(appIcon)
+                        }
                     }
 
                     override fun dropAnimationComplete(componentName: ComponentName) {
@@ -143,13 +156,15 @@ class DockItemViewHolder(
                     }
 
                     override fun exciteView() {
-                        dockItemViewController.setExcited(isExcited = true)
-                        dockItemViewController.animateAppIconExcited(appIcon)
+                        if (dockItemViewController.setExcited(isExcited = true)) {
+                            dockItemViewController.animateAppIconExcited(appIcon)
+                        }
                     }
 
                     override fun resetView() {
-                        dockItemViewController.setExcited(isExcited = false)
-                        dockItemViewController.animateAppIconExcited(appIcon)
+                        if (dockItemViewController.setExcited(isExcited = false)) {
+                            dockItemViewController.animateAppIconExcited(appIcon)
+                        }
                     }
 
                     override fun getDropContainerLocation(): Point {
@@ -178,15 +193,25 @@ class DockItemViewHolder(
     /**
      * @param callback [Runnable] to be called after the new item is bound
      */
-    fun bind(dockAppItem: DockAppItem, callback: Runnable? = null) {
-        dockItem = dockAppItem
+    fun bind(
+        dockAppItem: DockAppItem,
+        isUxRestrictionEnabled: Boolean,
+        callback: Runnable? = null,
+        hasActiveMediaSessions: Boolean
+    ) {
         itemTypeChanged(dockAppItem)
         appIcon.contentDescription = dockAppItem.name
         appIcon.setImageDrawable(dockAppItem.icon)
         appIcon.postDelayed({ callback?.run() }, CLEANUP_DELAY)
-        appIcon.setOnClickListener {
-            dockController.launchApp(dockAppItem.component, dockAppItem.isMediaApp)
-        }
+        dockItemClickListener = DockItemClickListener(
+            dockController,
+            dockAppItem,
+            isRestricted = !dockAppItem.isDistractionOptimized && isUxRestrictionEnabled &&
+              !hasActiveMediaSessions
+        )
+        appIcon.setOnClickListener(dockItemClickListener)
+        setUxRestrictions(dockAppItem, isUxRestrictionEnabled)
+        setHasActiveMediaSession(hasActiveMediaSessions)
         dockItemLongClickListener = DockItemLongClickListener(
                 dockAppItem,
                 pinItemClickDelegate = { dockController.appPinned(dockAppItem.id) },
@@ -202,7 +227,6 @@ class DockItemViewHolder(
     }
 
     fun itemTypeChanged(dockAppItem: DockAppItem) {
-        dockItem = dockAppItem
         when (dockAppItem.type) {
             DockAppItem.Type.DYNAMIC ->
                 dockItemViewController.setDynamic(dockAppItem.iconColorWithScrim)
@@ -213,5 +237,21 @@ class DockItemViewHolder(
         dockItemLongClickListener?.setDockAppItem(dockAppItem)
     }
 
+    /** Set if the Ux restrictions are enabled */
+    fun setUxRestrictions(dockAppItem: DockAppItem, isUxRestrictionEnabled: Boolean) {
+        val shouldBeRestricted = !dockAppItem.isDistractionOptimized && isUxRestrictionEnabled
+        if (dockItemViewController.setRestricted(shouldBeRestricted)) {
+            dockItemViewController.updateViewBasedOnState(appIcon)
+            dockItemClickListener?.setIsRestricted(dockItemViewController.shouldBeRestricted())
+        }
+    }
+
+    /** Set if item has an active media session */
+    fun setHasActiveMediaSession(hasActiveMediaSession: Boolean) {
+        if (dockItemViewController.setHasActiveMediaSession(hasActiveMediaSession)) {
+            dockItemViewController.updateViewBasedOnState(appIcon)
+            dockItemClickListener?.setIsRestricted(dockItemViewController.shouldBeRestricted())
+        }
+    }
     // TODO: b/301484526 Add animation when app icon is changed
 }

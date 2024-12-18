@@ -29,9 +29,9 @@ import com.android.car.carlauncher.homescreen.audio.media.MediaCardPresenter;
  * as a home module.
  */
 public class AudioCardModule implements HomeCardModule {
-    private AudioCardPresenter mAudioCardPresenter;
-    private AudioCardFragment mAudioCardView;
-    private ViewModelProvider mViewModelProvider;
+    protected AudioCardPresenter mAudioCardPresenter;
+    protected HomeCardInterface.View mAudioCardView;
+    protected ViewModelProvider mViewModelProvider;
     @Override
     public void setViewModelProvider(ViewModelProvider viewModelProvider) {
         if (mViewModelProvider != null) {

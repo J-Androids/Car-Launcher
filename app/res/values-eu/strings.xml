@@ -35,4 +35,6 @@
     <string name="recents_clear_all_text" msgid="3594272268167720553">"Garbitu guztia"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"Ez dago erabilgarri aplikazioa"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"Modu lasaia"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"Ilara"</string>
+    <string name="media_card_history_header_title" msgid="8337396297165848931">"Multimedia-iturburua"</string>
 </resources>

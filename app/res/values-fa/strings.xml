@@ -19,8 +19,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_title" msgid="1056886619192068947">"راه‌انداز خودرو"</string>
     <string name="default_media_song_title" msgid="7837564242036091946"></string>
-    <string name="tap_for_more_info_text" msgid="4240146824238692769">"برای اطلاعات بیشتر، روی کارت ضربه بزنید"</string>
-    <string name="tap_to_launch_text" msgid="7150379866796152196">"برای راه‌اندازی، روی کارت ضربه بزنید"</string>
+    <string name="tap_for_more_info_text" msgid="4240146824238692769">"برای اطلاعات بیشتر، روی کارت تک‌ضرب بزنید"</string>
+    <string name="tap_to_launch_text" msgid="7150379866796152196">"برای راه‌اندازی، روی کارت تک‌ضرب بزنید"</string>
     <string name="ongoing_call_duration_text_separator" msgid="2140398350095052096">" • "</string>
     <string name="ongoing_call_text" msgid="7160701768924041827">"تماس درحال انجام"</string>
     <string name="dialing_call_text" msgid="3286036311692512894">"درحال شماره‌گیری…"</string>
@@ -35,4 +35,6 @@
     <string name="recents_clear_all_text" msgid="3594272268167720553">"پاک کردن همه"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"برنامه دردسترس نیست"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"حالت «آرام»"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"صف پخش"</string>
+    <string name="media_card_history_header_title" msgid="8337396297165848931">"منبع رسانه"</string>
 </resources>

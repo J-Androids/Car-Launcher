@@ -40,6 +40,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class LauncherActivitiesDataSourceImplTest {
@@ -64,6 +65,7 @@ class LauncherActivitiesDataSourceImplTest {
         registerReceiverFun,
         unregisterReceiverFun,
         myUserHandle,
+        RuntimeEnvironment.getApplication().resources,
         bgDispatcher
     )
 

@@ -22,7 +22,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.content.res.Resources
 import android.os.UserHandle
+import com.android.car.carlauncher.R
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -44,6 +46,11 @@ interface LauncherActivitiesDataSource {
      */
     fun getOnPackagesChanged(): Flow<String>
 
+    /**
+     * Get packages to hide explicitly
+     */
+    fun getAppsToHide(): List<String>
+
     companion object {
         val TAG: String = LauncherActivitiesDataSource::class.java.simpleName
     }
@@ -59,6 +66,7 @@ interface LauncherActivitiesDataSource {
  * @property [unregisterReceiverFunction] Function to unregister the broadcast receiver.
  * Should be provided by the Android Component owning the [Context]
  * @property [userHandle] Specified user's handle to fetch launcher activities.
+ * @param [resources] Application resources, not bound to activity's configuration changes.
  * @property [bgDispatcher] Executes all the operations on this background coroutine dispatcher.
  */
 class LauncherActivitiesDataSourceImpl(
@@ -66,8 +74,11 @@ class LauncherActivitiesDataSourceImpl(
     private val registerReceiverFunction: (BroadcastReceiver, IntentFilter) -> Unit,
     private val unregisterReceiverFunction: (BroadcastReceiver) -> Unit,
     private val userHandle: UserHandle,
+    val resources: Resources,
     private val bgDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : LauncherActivitiesDataSource {
+
+    private val listOfApps = resources.getStringArray(R.array.hidden_apps).toList()
 
     /**
      * Gets all launcherActivities for a user with [userHandle]
@@ -116,5 +127,14 @@ class LauncherActivitiesDataSourceImpl(
                 unregisterReceiverFunction(receiver)
             }
         }.flowOn(bgDispatcher).conflate()
+    }
+
+    /**
+     * Gets packages that are explicitly required to be hidden.
+     *
+     * * Note: This packages are defined in [Resources] by name __hidden_apps__
+     */
+    override fun getAppsToHide(): List<String> {
+        return listOfApps
     }
 }

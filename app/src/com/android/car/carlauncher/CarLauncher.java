@@ -17,16 +17,16 @@
 package com.android.car.carlauncher;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.car.settings.CarSettings.Secure.KEY_USER_TOS_ACCEPTED;
+import static android.car.settings.CarSettings.Secure.KEY_UNACCEPTED_TOS_DISABLED_APPS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
+import static com.android.car.carlauncher.AppGridFragment.Mode.ALL_APPS;
 import static com.android.car.carlauncher.CarLauncherViewModel.CarLauncherViewModelFactory;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackListener;
 import android.car.Car;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -81,8 +82,9 @@ public class CarLauncher extends FragmentActivity {
     private boolean mIsReadyLogged;
     private boolean mUseSmallCanvasOptimizedMap;
     private ViewGroup mMapsCard;
-    private CarLauncherViewModel mCarLauncherViewModel;
 
+    @VisibleForTesting
+    CarLauncherViewModel mCarLauncherViewModel;
     @VisibleForTesting
     ContentObserver mTosContentObserver;
 
@@ -113,7 +115,6 @@ public class CarLauncher extends FragmentActivity {
         public void handleIntent(Intent intent) {
             if (intent != null) {
                 ActivityOptions options = ActivityOptions.makeBasic();
-                options.setLaunchDisplayId(getDisplay().getDisplayId());
                 startActivity(intent, options.toBundle());
             }
         }
@@ -126,55 +127,13 @@ public class CarLauncher extends FragmentActivity {
         if (DEBUG) {
             Log.d(TAG, "onCreate(" + getUserId() + ") displayId=" + getDisplayId());
         }
-        // Since MUMD is introduced, CarLauncher can be called in the main display of visible users.
-        // In ideal shape, CarLauncher should handle both driver and passengers together.
-        // But, in the mean time, we have separate launchers for driver and passengers, so
-        // CarLauncher needs to reroute the request to Passenger launcher if it is invoked from
-        // the main display of passengers (not driver).
-        // For MUPAND, PassengerLauncher should be the default launcher.
-        // For non-main displays, ATM will invoke SECONDARY_HOME Intent, so the secondary launcher
-        // should handle them.
+        // Since MUMD/MUPAND is introduced, CarLauncher can be called in the main display of
+        // visible background users.
+        // For Passenger scenarios, replace the maps_card with AppGridActivity, as currently
+        // there is no maps use-case for passengers.
         UserManager um = getSystemService(UserManager.class);
         boolean isPassengerDisplay = getDisplayId() != Display.DEFAULT_DISPLAY
                 || um.isVisibleBackgroundUsersOnDefaultDisplaySupported();
-        if (isPassengerDisplay) {
-            String passengerLauncherName = getString(R.string.config_passengerLauncherComponent);
-            Intent passengerHomeIntent;
-            if (!passengerLauncherName.isEmpty()) {
-                ComponentName component = ComponentName.unflattenFromString(passengerLauncherName);
-                if (component == null) {
-                    throw new IllegalStateException(
-                            "Invalid passengerLauncher name=" + passengerLauncherName);
-                }
-                passengerHomeIntent = new Intent(Intent.ACTION_MAIN)
-                        // passenger launcher should be launched in home task in order to
-                        // fix TaskView layering issue
-                        .addCategory(Intent.CATEGORY_HOME)
-                        .setComponent(component);
-            } else {
-                // No passenger launcher is specified, then use AppsGrid as a fallback.
-                passengerHomeIntent = CarLauncherUtils.getAppsGridIntent();
-            }
-            ActivityOptions options = ActivityOptions
-                    // No animation for the trampoline.
-                    .makeCustomAnimation(this, /* enterResId=*/ 0, /* exitResId= */ 0)
-                    .setLaunchDisplayId(getDisplayId());
-            startActivity(passengerHomeIntent, options.toBundle());
-            finish();
-            return;
-        }
-
-        mUseSmallCanvasOptimizedMap =
-                CarLauncherUtils.isSmallCanvasOptimizedMapIntentConfigured(this);
-
-        mActivityManager = getSystemService(ActivityManager.class);
-        mCarLauncherTaskId = getTaskId();
-        TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
-
-        // Setting as trusted overlay to let touches pass through.
-        getWindow().addPrivateFlags(PRIVATE_FLAG_TRUSTED_OVERLAY);
-        // To pass touches to the underneath task.
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
 
         // Don't show the maps panel in multi window mode.
         // NOTE: CTS tests for split screen are not compatible with activity views on the default
@@ -183,14 +142,37 @@ public class CarLauncher extends FragmentActivity {
             setContentView(R.layout.car_launcher_multiwindow);
         } else {
             setContentView(R.layout.car_launcher);
-            // We don't want to show Map card unnecessarily for the headless user 0.
-            if (!UserHelperLite.isHeadlessSystemUser(getUserId())) {
-                mMapsCard = findViewById(R.id.maps_card);
-                if (mMapsCard != null) {
-                    setupRemoteCarTaskView(mMapsCard);
+            // Passenger displays do not require TaskView Embedding
+            if (!isPassengerDisplay) {
+                mUseSmallCanvasOptimizedMap =
+                        CarLauncherUtils.isSmallCanvasOptimizedMapIntentConfigured(this);
+
+                mActivityManager = getSystemService(ActivityManager.class);
+                mCarLauncherTaskId = getTaskId();
+                TaskStackChangeListeners.getInstance().registerTaskStackListener(
+                        mTaskStackListener);
+
+                // Setting as trusted overlay to let touches pass through.
+                getWindow().addPrivateFlags(PRIVATE_FLAG_TRUSTED_OVERLAY);
+                // To pass touches to the underneath task.
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                // We don't want to show Map card unnecessarily for the headless user 0
+                if (!UserHelperLite.isHeadlessSystemUser(getUserId())) {
+                    mMapsCard = findViewById(R.id.maps_card);
+                    if (mMapsCard != null) {
+                        setupRemoteCarTaskView(mMapsCard);
+                    }
                 }
+            } else {
+                // For Passenger display show the AppGridFragment in place of the Maps view.
+                // Also we can skip initializing all the TaskView related objects as they are not
+                // used in this case.
+                getSupportFragmentManager().beginTransaction().replace(R.id.maps_card,
+                        AppGridFragment.newInstance(ALL_APPS)).commit();
+
             }
         }
+
         MediaIntentRouter.getInstance().registerMediaIntentHandler(mMediaIntentHandler);
         initializeCards();
         setupContentObserversForTos();
@@ -198,15 +180,25 @@ public class CarLauncher extends FragmentActivity {
 
     private void setupRemoteCarTaskView(ViewGroup parent) {
         mCarLauncherViewModel = new ViewModelProvider(this,
-                new CarLauncherViewModelFactory(this, getMapsIntent()))
+                new CarLauncherViewModelFactory(this))
                 .get(CarLauncherViewModel.class);
+        mCarLauncherViewModel.initializeRemoteCarTaskView(getMapsIntent());
 
         getLifecycle().addObserver(mCarLauncherViewModel);
+        addOnNewIntentListener(mCarLauncherViewModel.getNewIntentListener());
 
         mCarLauncherViewModel.getRemoteCarTaskView().observe(this, taskView -> {
-            if (taskView != null && taskView.getParent() == null) {
-                parent.addView(taskView);
+            if (taskView == null || taskView.getParent() == parent) {
+                // Discard if the parent is still the same because it doesn't signify a config
+                // change.
+                return;
             }
+            if (taskView.getParent() != null) {
+                // Discard the previous parent as its invalid now.
+                ((ViewGroup) taskView.getParent()).removeView(taskView);
+            }
+            parent.removeAllViews(); // Just a defense against a dirty parent.
+            parent.addView(taskView);
         });
     }
 
@@ -220,12 +212,16 @@ public class CarLauncher extends FragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        unregisterTosContentObserver();
+        release();
+    }
+
+    private void unregisterTosContentObserver() {
         if (mTosContentObserver != null) {
             Log.i(TAG, "Unregister content observer for tos state");
             getContentResolver().unregisterContentObserver(mTosContentObserver);
             mTosContentObserver = null;
         }
-        release();
     }
 
     private int getTaskViewTaskId() {
@@ -236,10 +232,13 @@ public class CarLauncher extends FragmentActivity {
     }
 
     private void release() {
-        // When using a ViewModel for the RemoteCarTaskViews, the task view can still be attached
-        // to the mMapsCard due to which the CarLauncher activity does not get garbage collected
-        // during activity recreation.
-        mMapsCard = null;
+        if (mMapsCard != null) {
+            // This is important as the TaskView is preserved during config change in ViewModel and
+            // to avoid the memory leak, it should be plugged out of the View hierarchy.
+            mMapsCard.removeAllViews();
+            mMapsCard = null;
+        }
+
         if (mCar != null) {
             mCar.disconnect();
             mCar = null;
@@ -261,6 +260,11 @@ public class CarLauncher extends FragmentActivity {
                     long reflectionStartTime = System.currentTimeMillis();
                     HomeCardModule cardModule = (HomeCardModule)
                             Class.forName(providerClassName).newInstance();
+                    if (Flags.mediaCardFullscreen()) {
+                        if (cardModule.getCardResId() == R.id.top_card) {
+                            findViewById(R.id.top_card).setVisibility(View.GONE);
+                        }
+                    }
                     cardModule.setViewModelProvider(new ViewModelProvider(/* owner= */this));
                     mHomeCardModules.add(cardModule);
                     if (DEBUG) {
@@ -333,21 +337,36 @@ public class CarLauncher extends FragmentActivity {
                 || !AppLauncherUtils.tosAccepted(/* context = */ this)) {
             Log.i(TAG, "TOS not accepted, setting up content observers for TOS state");
         } else {
-            Log.i(TAG, "TOS accepted, state will remain accepted, "
-                    + "don't need to observe this value");
+            Log.i(TAG,
+                    "TOS accepted, state will remain accepted, don't need to observe this value");
             return;
         }
         mTosContentObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
-                // TODO (b/280077391): Release the remote task view and recreate the map activity
-                Log.i(TAG, "TOS state updated:" + AppLauncherUtils.tosAccepted(getBaseContext()));
-                recreate();
+                // Release the task view and re-initialize the remote car task view with the new
+                // maps intent whenever an onChange is received. This is because the TOS state
+                // can go from uninitialized to not accepted during which there could be a race
+                // condition in which the maps activity is from the uninitialized state.
+                Set<String> tosDisabledApps = AppLauncherUtils.getTosDisabledPackages(
+                        getBaseContext());
+                boolean tosAccepted = AppLauncherUtils.tosAccepted(getBaseContext());
+                Log.i(TAG, "TOS state updated:" + tosAccepted);
+                if (DEBUG) {
+                    Log.d(TAG, "TOS disabled apps:" + tosDisabledApps);
+                }
+                if (mCarLauncherViewModel.getRemoteCarTaskView().getValue() != null) {
+                    mCarLauncherViewModel.getRemoteCarTaskView().getValue().release();
+                    setupRemoteCarTaskView(mMapsCard);
+                }
+                if (tosAccepted) {
+                    unregisterTosContentObserver();
+                }
             }
         };
         getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(KEY_USER_TOS_ACCEPTED),
+                Settings.Secure.getUriFor(KEY_UNACCEPTED_TOS_DISABLED_APPS),
                 /* notifyForDescendants*/ false,
                 mTosContentObserver);
     }

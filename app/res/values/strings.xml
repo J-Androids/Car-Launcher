@@ -57,4 +57,8 @@
     <!-- Calm mode strings -->
     <string name="calm_mode_title">Calm mode</string>
     <string name="calm_mode_separator" translatable="false">\u0020\u0020\u0020\u2022\u0020\u0020\u0020</string>
+
+    <!-- Fullscreen media card strings -->
+    <string name="media_card_queue_header_title">Queue</string>
+    <string name="media_card_history_header_title">Media Source</string>
 </resources>

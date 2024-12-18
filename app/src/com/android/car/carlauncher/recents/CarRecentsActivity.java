@@ -62,6 +62,7 @@ public class CarRecentsActivity extends AppCompatActivity implements
     private Animator mClearAllAnimator;
     private NonDODisabledTaskProvider mNonDODisabledTaskProvider;
     private Set<String> mPackagesToHideFromRecents;
+    private boolean mLaunchMostRecentTaskOnDismiss;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,8 @@ public class CarRecentsActivity extends AppCompatActivity implements
         mNonDODisabledTaskProvider = new NonDODisabledTaskProvider(this);
         mRecentTasksViewModel.setDisabledTaskProvider(mNonDODisabledTaskProvider);
         WindowMetrics windowMetrics = this.getWindowManager().getCurrentWindowMetrics();
+        mLaunchMostRecentTaskOnDismiss = getResources().getBoolean(
+                R.bool.config_launch_most_recent_task_on_recents_dismiss);
         mRecentTasksViewModel.init(
                 /* displayId= */ getDisplay().getDisplayId(),
                 /* windowWidth= */ windowMetrics.getBounds().width(),
@@ -147,7 +150,9 @@ public class CarRecentsActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         if (OPEN_RECENT_TASK_ACTION.equals(getIntent().getAction())) {
-            mRecentTasksViewModel.openMostRecentTask();
+            if (mLaunchMostRecentTaskOnDismiss) {
+                mRecentTasksViewModel.openMostRecentTask();
+            }
             return;
         }
         mRecentTasksViewModel.fetchRecentTaskList();
@@ -174,7 +179,9 @@ public class CarRecentsActivity extends AppCompatActivity implements
         super.onDestroy();
         mNonDODisabledTaskProvider.terminate();
         mRecentTasksViewModel.terminate();
-        mClearAllAnimator.end();
+        if (mClearAllAnimator.isRunning()) {
+            mClearAllAnimator.end();
+        }
         mClearAllAnimator.removeAllListeners();
     }
 

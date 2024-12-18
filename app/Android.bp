@@ -51,6 +51,7 @@ android_library {
         "CarAppGrid-lib",
         "SystemUISharedLib",
         "android.car.cluster.navigation",
+        "car-resource-common",
     ],
 
     libs: ["android.car"],

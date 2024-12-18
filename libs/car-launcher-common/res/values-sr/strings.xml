@@ -19,14 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_pin_shortcut_label" msgid="7319916279393348946">"Закачи апликацију"</string>
     <string name="dock_unpin_shortcut_label" msgid="1657441916649851101">"Откачи апликацију"</string>
-    <!-- no translation found for stop_app_shortcut_label (5893149773635675147) -->
-    <skip />
-    <!-- no translation found for app_info_shortcut_label (6724408677044314793) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_title (7027389231920405129) -->
-    <skip />
-    <!-- no translation found for stop_app_dialog_text (4997162043741899166) -->
-    <skip />
-    <!-- no translation found for stop_app_success_toast_text (3740858295088091414) -->
-    <skip />
+    <string name="stop_app_shortcut_label" msgid="5893149773635675147">"Заустави апликацију"</string>
+    <string name="app_info_shortcut_label" msgid="6724408677044314793">"Информације о апликацији"</string>
+    <string name="stop_app_dialog_title" msgid="7027389231920405129">"Желите да зауставите апликацију?"</string>
+    <string name="stop_app_dialog_text" msgid="4997162043741899166">"Ако принудно зауставите апликацију, можда ће се понашати неочекивано."</string>
+    <string name="stop_app_success_toast_text" msgid="3740858295088091414">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је заустављена."</string>
+    <string name="ndo_launch_fail_toast_text" msgid="633927891331266600">"Не можете да користите апликацију <xliff:g id="APP_NAME">%1$s</xliff:g> током вожње."</string>
 </resources>

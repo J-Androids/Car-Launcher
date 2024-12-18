@@ -31,8 +31,10 @@
     <string name="fake_weather_main_text" msgid="2545755284647327839">"--° Většinou slunečno"</string>
     <string name="fake_weather_footer_text" msgid="8640814250285014485">"Mountain View • Nejvyšší: --° Nejnižší: --°"</string>
     <string name="times_separator" msgid="1962841895013564645">"/"</string>
-    <string name="recents_empty_state_text" msgid="8228569970506899117">"Žádné nedávné položky"</string>
+    <string name="recents_empty_state_text" msgid="8228569970506899117">"Žádné položky z nedávné doby"</string>
     <string name="recents_clear_all_text" msgid="3594272268167720553">"Vymazat vše"</string>
     <string name="failure_opening_recent_task_message" msgid="963567570097465902">"Aplikace není k dispozici"</string>
     <string name="calm_mode_title" msgid="4364804976931157567">"Klidný režim"</string>
+    <string name="media_card_queue_header_title" msgid="8801994125708995575">"Fronta"</string>
+    <string name="media_card_history_header_title" msgid="8337396297165848931">"Zdroj médií"</string>
 </resources>

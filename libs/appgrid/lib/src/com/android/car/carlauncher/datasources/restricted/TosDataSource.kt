@@ -21,6 +21,7 @@ import android.car.settings.CarSettings.Secure.KEY_UNACCEPTED_TOS_DISABLED_APPS
 import android.car.settings.CarSettings.Secure.KEY_USER_TOS_ACCEPTED
 import android.content.ContentResolver
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.content.pm.ResolveInfo
 import android.database.ContentObserver
 import android.os.Handler
@@ -89,7 +90,8 @@ class TosDataSourceImpl(
                         packageManager,
                         contentResolver,
                         KEY_UNACCEPTED_TOS_DISABLED_APPS,
-                        TOS_DISABLED_APPS_SEPARATOR
+                        TOS_DISABLED_APPS_SEPARATOR,
+                        MATCH_DISABLED_COMPONENTS
                     )
                 )
             )
@@ -116,7 +118,8 @@ class TosDataSourceImpl(
                             packageManager,
                             contentResolver,
                             KEY_UNACCEPTED_TOS_DISABLED_APPS,
-                            TOS_DISABLED_APPS_SEPARATOR
+                            TOS_DISABLED_APPS_SEPARATOR,
+                            MATCH_DISABLED_COMPONENTS
                         )
                     }
                     trySend(TosState(shouldBlockTosApps(), restrictedApps))

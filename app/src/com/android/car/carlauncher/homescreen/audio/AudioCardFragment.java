@@ -68,7 +68,7 @@ public class AudioCardFragment extends Fragment implements HomeCardInterface.Vie
         super.onViewCreated(view, savedInstanceState);
 
         mViewCreated = true;
-        mMediaFragment = new MediaCardFragment();
+        mMediaFragment = createMediaFragment();
         mInCallFragment = new DialerCardFragment();
 
         FragmentTransaction ft = getChildFragmentManager().beginTransaction();
@@ -83,6 +83,10 @@ public class AudioCardFragment extends Fragment implements HomeCardInterface.Vie
         if (mOnViewLifecycleChangeListener != null) {
             mOnViewLifecycleChangeListener.onViewCreated();
         }
+    }
+
+    protected MediaCardFragment createMediaFragment() {
+        return new MediaCardFragment();
     }
 
     @Override
@@ -112,7 +116,8 @@ public class AudioCardFragment extends Fragment implements HomeCardInterface.Vie
         return mInCallFragment;
     }
 
-    void showMediaCard() {
+    /** Does a fragment transaction to show the media card and hide the dialer card */
+    public void showMediaCard() {
         FragmentManager fragmentManager = getChildFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.show(mMediaFragment);
@@ -120,7 +125,8 @@ public class AudioCardFragment extends Fragment implements HomeCardInterface.Vie
         transaction.commitAllowingStateLoss();
     }
 
-    void showInCallCard() {
+    /** Does a fragment transaction to show the dialer card and hide the media card */
+    public void showInCallCard() {
         FragmentManager fragmentManager = getChildFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.hide(mMediaFragment);

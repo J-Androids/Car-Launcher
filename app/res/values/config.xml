@@ -61,15 +61,12 @@
     <string-array name="config_taskViewPackages" translatable="false">
     </string-array>
 
-    <!--
-        The Activity to use as a passenger Launcher, if empty, it assumes CarLauncher can do
-        the passenger Launcher role too.
-    -->
-    <string name="config_passengerLauncherComponent">com.android.car.multidisplay/.launcher.LauncherActivity</string>
-
     <!-- Boolean value to indicate if the secondary descriptive text of homescreen cards
          without controls should have multiple lines -->
     <bool name="config_homecard_single_line_secondary_descriptive_text">true</bool>
+
+    <!-- Boolean value to indicate if the recents activity should open the most recent task on dismiss. -->
+    <bool name="config_launch_most_recent_task_on_recents_dismiss">true</bool>
 
     <!-- Config values for Calm mode and information shown on the Calm mode screen -->
     <bool name="config_enableCalmMode">true</bool>

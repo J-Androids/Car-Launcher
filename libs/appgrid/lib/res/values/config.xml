@@ -45,4 +45,11 @@
          * Integer value 0 implies to show the banner after every reboot
    -->
     <integer name="config_tos_banner_resurface_time_days">1</integer>
+
+    <!--
+        Config for allowing NDO apps to be opened while driving if they contain an active media
+        session. These NDO apps will still be blocked by blocking UI, but may be provided controls.
+        This does not affect the media widget's ability to show or control media sessions.
+    -->
+    <bool name="config_enableMediaSessionAppsWhileDriving">true</bool>
 </resources>

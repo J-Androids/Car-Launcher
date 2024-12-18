@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.docklib.data.DockAppItem
+import com.android.car.docklib.data.DockProtoDataController
 import com.android.launcher3.icons.IconFactory
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
@@ -77,26 +78,13 @@ class DockViewModelTest {
     private var iconFactoryMock = mock<IconFactory> {
         on { createScaledBitmap(any<Drawable>(), anyInt()) } doReturn bitmapMock
     }
+    private val dataController = mock<DockProtoDataController>()
 
     @Before
     fun setUp() {
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities =
-                createTestComponentList(
-                        pkgPrefix = "LAUNCHER_PKG", classPrefix = "LAUNCHER_CLASS").toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        // explicitly use default items unless saved items are set
+        whenever(dataController.loadFromFile()).thenReturn(null)
+        model = createSpyDockViewModel()
         doNothing().whenever(model).showToast(any())
     }
 
@@ -105,27 +93,49 @@ class DockViewModelTest {
         val defaultPinnedItems =
                 createTestComponentList(pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS")
 
-        model = DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities =
-                createTestComponentList(
-                    pkgPrefix = "LAUNCHER_PKG", classPrefix = "LAUNCHER_CLASS").toMutableSet(),
-                defaultPinnedItems = defaultPinnedItems,
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        )
+        model = createSpyDockViewModel(defaultPinnedItems = defaultPinnedItems)
 
         assertThat(items.size).isEqualTo(MAX_ITEMS)
         assertThat(items[0].component).isEqualTo(defaultPinnedItems[0])
         assertThat(items[1].component).isEqualTo(defaultPinnedItems[1])
         assertThat(items[2].component).isEqualTo(defaultPinnedItems[2])
         assertThat(items[3].component).isEqualTo(defaultPinnedItems[3])
+    }
+
+    @Test
+    fun init_savedPinnedItems_noItemAddedToDock() {
+        val defaultPinnedItems =
+            createTestComponentList(pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS")
+        val savedPinnedItems = mapOf<Int, ComponentName>()
+        whenever(dataController.loadFromFile()).thenReturn(savedPinnedItems)
+
+        model = createSpyDockViewModel(defaultPinnedItems = defaultPinnedItems)
+
+        assertThat(items.size).isEqualTo(MAX_ITEMS)
+        assertThat(items[0].type).isEqualTo(DockAppItem.Type.DYNAMIC)
+        assertThat(items[1].type).isEqualTo(DockAppItem.Type.DYNAMIC)
+        assertThat(items[2].type).isEqualTo(DockAppItem.Type.DYNAMIC)
+        assertThat(items[3].type).isEqualTo(DockAppItem.Type.DYNAMIC)
+    }
+
+    @Test
+    fun init_savedPinnedItems_onlySavedItemsAddedToDock() {
+        val defaultPinnedItems =
+            createTestComponentList(pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS")
+        val savedPinnedItems =
+            mapOf(
+                0 to createNewComponent(pkg = "SAVED_PKG_0", clazz = "SAVED_CLASS_0", false),
+                2 to createNewComponent(pkg = "SAVED_PKG_2", clazz = "SAVED_CLASS_2", false),
+            )
+        whenever(dataController.loadFromFile()).thenReturn(savedPinnedItems)
+
+        model = createSpyDockViewModel(defaultPinnedItems = defaultPinnedItems)
+
+        assertThat(items.size).isEqualTo(MAX_ITEMS)
+        assertThat(items[0].component).isEqualTo(savedPinnedItems[0])
+        assertThat(items[1].type).isEqualTo(DockAppItem.Type.DYNAMIC)
+        assertThat(items[2].component).isEqualTo(savedPinnedItems[2])
+        assertThat(items[3].type).isEqualTo(DockAppItem.Type.DYNAMIC)
     }
 
     @Test
@@ -367,21 +377,7 @@ class DockViewModelTest {
 
     @Test
     fun createDockList_indexNotFilled_noRecentTasks_noLauncherApp_errorThrown() {
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities = mutableSetOf(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        model = createSpyDockViewModel(launcherActivities = mutableSetOf())
         doReturn(List<ActivityManager.RunningTaskInfo>(0) { return })
                 .whenever(model).getRunningTasks()
         model.internalItems.remove(2)
@@ -392,21 +388,10 @@ class DockViewModelTest {
     @Test
     fun createDockList_indexNotFilled_noRecentTasks_launcherActivitiesExcluded_errorThrown() {
         val cmpList = createTestComponentList(pkgPrefix = "testPkg", classPrefix = "testClass")
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
+        model = createSpyDockViewModel(
                 launcherActivities = cmpList.toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
                 excludedComponents = cmpList.toSet(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        )
         doReturn(List<ActivityManager.RunningTaskInfo>(0) { return })
                 .whenever(model).getRunningTasks()
         model.internalItems.remove(2)
@@ -417,21 +402,7 @@ class DockViewModelTest {
     @Test
     fun createDockList_indexNotFilled_noRecentTasks_launcherActivitiesAlreadyInDock_errorThrown() {
         val launcherAppComponent = createNewComponent(pkg = "testPkg", clazz = "testClass")
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities = mutableSetOf(launcherAppComponent),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        model = createSpyDockViewModel(launcherActivities = mutableSetOf(launcherAppComponent))
         doReturn(List<ActivityManager.RunningTaskInfo>(0) { return })
                 .whenever(model).getRunningTasks()
         model.internalItems[2] = TestUtils.createAppItem(component = launcherAppComponent)
@@ -446,21 +417,7 @@ class DockViewModelTest {
                 pkgPrefix = "testPkg",
                 classPrefix = "testClass"
         )
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities = launcherActivities.toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        model = createSpyDockViewModel(launcherActivities = launcherActivities.toMutableSet())
         doReturn(List<ActivityManager.RunningTaskInfo>(0) { return })
                 .whenever(model).getRunningTasks()
         model.internalItems.remove(2)
@@ -476,21 +433,7 @@ class DockViewModelTest {
                 pkgPrefix = "testPkg",
                 classPrefix = "testClass"
         )
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities = launcherActivities.toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        model = createSpyDockViewModel(launcherActivities = launcherActivities.toMutableSet())
         doReturn(createTestRunningTaskInfoList(userId = CURRENT_USER_ID + 1))
                 .whenever(model)
                 .getRunningTasks()
@@ -508,21 +451,10 @@ class DockViewModelTest {
                 classPrefix = "testClass"
         )
         val excludedComponent = createNewComponent(pkg = "excludedPkg", clazz = "excludedClass")
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
+        model = createSpyDockViewModel(
                 launcherActivities = launcherActivities.toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
                 excludedComponents = setOf(excludedComponent),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        )
         doReturn(createTestRunningTaskInfoList(component = excludedComponent))
                 .whenever(model)
                 .getRunningTasks()
@@ -541,21 +473,7 @@ class DockViewModelTest {
         )
         val recentTaskComponent =
                 createNewComponent(pkg = "recentTaskPkg", clazz = "recentTaskClass")
-        model = spy(DockViewModel(
-                maxItemsInDock = MAX_ITEMS,
-                context = contextMock,
-                packageManager = packageManagerMock,
-                carPackageManager = carPackageManagerMock,
-                userId = CURRENT_USER_ID,
-                launcherActivities = launcherActivities.toMutableSet(),
-                defaultPinnedItems =
-                createTestComponentList(
-                        pkgPrefix = "DEFAULT_PKG", classPrefix = "DEFAULT_CLASS"),
-                excludedComponents = setOf(),
-                excludedPackages = setOf(),
-                iconFactory = iconFactoryMock,
-                observer = { items = it },
-        ))
+        model = createSpyDockViewModel(launcherActivities = launcherActivities.toMutableSet())
         doReturn(createTestRunningTaskInfoList(component = recentTaskComponent))
                 .whenever(model)
                 .getRunningTasks()
@@ -618,6 +536,7 @@ class DockViewModelTest {
 
     @Test
     fun setCarPackageManager_distractionValuesUpdated() {
+        model = createSpyDockViewModel(shouldSetCarPackageManager = false)
         for (i in 0..<4) {
             model.internalItems[i] = TestUtils.createAppItem(
                     pkg = "pkg$i",
@@ -652,6 +571,34 @@ class DockViewModelTest {
                 "pkg3" -> assertThat(it.isDistractionOptimized).isEqualTo(false)
             }
         }
+    }
+
+    private fun createSpyDockViewModel(
+            shouldSetCarPackageManager: Boolean = true,
+            launcherActivities: MutableSet<ComponentName> = createTestComponentList(
+                    pkgPrefix = "LAUNCHER_PKG",
+                    classPrefix = "LAUNCHER_CLASS"
+            ).toMutableSet(),
+            defaultPinnedItems: List<ComponentName> = createTestComponentList(
+                    pkgPrefix = "DEFAULT_PKG",
+                    classPrefix = "DEFAULT_CLASS"
+            ),
+            excludedComponents: Set<ComponentName> = setOf(),
+    ): DockViewModel {
+        return spy(DockViewModel(
+                maxItemsInDock = MAX_ITEMS,
+                context = contextMock,
+                packageManager = packageManagerMock,
+                if (shouldSetCarPackageManager) carPackageManagerMock else null,
+                userId = CURRENT_USER_ID,
+                launcherActivities,
+                defaultPinnedItems,
+                isPackageExcluded = { false },
+                isComponentExcluded = { excludedComponents.contains(it) },
+                iconFactory = iconFactoryMock,
+                dockProtoDataController = dataController,
+                observer = { items = it },
+        ))
     }
 
     private fun createTestRunningTaskInfoList(

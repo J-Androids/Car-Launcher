@@ -1,0 +1,256 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by motionlicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<MotionScene
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- layoutDuringTransition respects queue RecyclerView scroll animations -->
+    <Transition
+        motion:constraintSetEnd="@id/end"
+        motion:constraintSetStart="@id/start"
+        motion:duration="@integer/media_card_bottom_panel_open_duration"
+        motion:motionInterpolator="standard"
+        motion:layoutDuringTransition="honorRequest">
+        <KeyFrameSet>
+            <KeyAttribute
+                android:alpha="1"
+                motion:framePosition="0"
+                motion:motionTarget="@id/playback_action_id1" />
+            <KeyAttribute
+                android:alpha="0"
+                motion:framePosition="60"
+                motion:motionTarget="@id/playback_action_id1" />
+            <KeyAttribute
+                android:alpha="1"
+                motion:framePosition="0"
+                motion:motionTarget="@id/playback_action_id2" />
+            <KeyAttribute
+                android:alpha="0"
+                motion:framePosition="60"
+                motion:motionTarget="@id/playback_action_id2" />
+            <KeyAttribute
+                android:alpha="0"
+                motion:framePosition="40"
+                motion:motionTarget="@id/button_panel_background" />
+            <KeyAttribute
+                android:alpha="0"
+                motion:framePosition="60"
+                motion:motionTarget="@id/button_panel_background" />
+            <KeyTrigger
+                motion:framePosition="30"
+                motion:motionTarget="@id/button_panel_background"
+                motion:onPositiveCross="."
+                tools:ignore="MotionSceneFileValidationError">
+                <CustomMethod motion:methodName="setEnabled" motion:customBoolean="true"/>
+            </KeyTrigger>
+            <KeyTrigger
+                motion:framePosition="40"
+                motion:motionTarget="@id/button_panel_background"
+                motion:onNegativeCross="."
+                tools:ignore="MotionSceneFileValidationError">
+                <CustomMethod motion:methodName="setEnabled" motion:customBoolean="false"/>
+            </KeyTrigger>
+            <KeyTrigger
+                motion:framePosition="30"
+                motion:motionTarget="@id/playback_seek_bar"
+                motion:onPositiveCross="."
+                tools:ignore="MotionSceneFileValidationError">
+                <CustomMethod motion:methodName="setSelected" motion:customBoolean="true"/>
+            </KeyTrigger>
+            <KeyTrigger
+                motion:framePosition="40"
+                motion:motionTarget="@id/playback_seek_bar"
+                motion:onNegativeCross="."
+                tools:ignore="MotionSceneFileValidationError">
+                <CustomMethod motion:methodName="setSelected" motion:customBoolean="false"/>
+            </KeyTrigger>
+        </KeyFrameSet>
+    </Transition>
+
+    <ConstraintSet
+        android:id="@+id/start">
+        <ConstraintOverride
+            android:id="@id/media_widget_app_icon">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/title">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+            <CustomAttribute
+                motion:attributeName="lineHeight"
+                motion:customDimension="@dimen/media_card_title_default_line_height" />
+            <CustomAttribute
+                motion:attributeName="textSize"
+                motion:customDimension="@dimen/media_card_title_default_text_size" />
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/subtitle">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/content_format">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/playback_action_id1">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/playback_action_id2">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/album_art">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/playback_seek_bar">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/end">
+        <Constraint
+            android:id="@+id/play_pause_button"
+            android:layout_width="@dimen/media_card_large_button_size"
+            android:layout_height="@dimen/media_card_large_button_size"
+            android:src="@drawable/ic_play_pause_selector"
+            android:scaleType="center"
+            android:tint="@color/car_surface_container_high"
+            android:background="@drawable/pill_button_shape"
+            android:backgroundTint="@color/car_primary"
+            android:layout_marginStart="@dimen/media_card_horizontal_margin"
+            android:layout_marginTop="@dimen/media_card_margin_panel_open"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="parent">
+        </Constraint>
+        <Constraint
+            android:id="@+id/button_panel_background"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/media_card_bottom_panel_animated_size"
+            android:background="@drawable/media_card_button_panel_background"
+            android:backgroundTint="@color/car_surface_container_highest"
+            android:layout_marginStart="@dimen/media_card_horizontal_margin"
+            android:layout_marginEnd="@dimen/media_card_horizontal_margin"
+            android:layout_marginTop="@dimen/media_card_margin_panel_open"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintTop_toBottomOf="@id/play_pause_button">
+        </Constraint>
+        <Constraint
+            android:id="@+id/empty_panel"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/car_surface_container_high"
+            motion:layout_constraintTop_toTopOf="parent">
+        </Constraint>
+        <ConstraintOverride
+            android:id="@id/media_widget_app_icon"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <Constraint
+            android:id="@+id/title"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:text="@string/metadata_default_title"
+            android:textColor="@color/car_text_primary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="@dimen/media_card_margin_panel_open"
+            android:layout_marginTop="@dimen/media_card_view_separation_margin"
+            android:layout_marginEnd="@dimen/media_card_horizontal_margin"
+            motion:layout_constraintStart_toEndOf="@id/play_pause_button"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintTop_toTopOf="@id/play_pause_button"
+            motion:layout_constraintBottom_toTopOf="@id/playback_seek_bar"
+            motion:layout_constraintVertical_bias="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+            <CustomAttribute
+                motion:attributeName="lineHeight"
+                motion:customDimension="@dimen/media_card_title_animated_line_height" />
+            <CustomAttribute
+                motion:attributeName="textSize"
+                motion:customDimension="@dimen/media_card_title_animated_text_size" />
+        </Constraint>
+        <ConstraintOverride
+            android:id="@id/subtitle"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/content_format"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <Constraint
+            android:id="@+id/playback_seek_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:paddingEnd="0dp"
+            android:paddingStart="0dp"
+            android:progressBackgroundTint="@color/car_surface_container_highest"
+            android:progressDrawable="@drawable/media_card_seekbar_progress"
+            android:progressTint="@color/car_primary"
+            android:splitTrack="false"
+            android:thumb="@drawable/media_card_seekbar_thumb"
+            android:thumbTint="@color/car_on_surface"
+            android:thumbOffset="0px"
+            android:layout_marginStart="@dimen/media_card_margin_panel_open"
+            android:layout_marginEnd="@dimen/media_card_horizontal_margin"
+            motion:layout_constraintStart_toEndOf="@id/play_pause_button"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintBottom_toBottomOf="@id/play_pause_button"
+            motion:layout_constraintTop_toBottomOf="@id/title">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </Constraint>
+        <ConstraintOverride
+            android:id="@id/playback_action_id1"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/playback_action_id2"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+        <ConstraintOverride
+            android:id="@id/album_art"
+            android:alpha="0">
+            <PropertySet
+                motion:visibilityMode="ignore"/>
+        </ConstraintOverride>
+    </ConstraintSet>
+</MotionScene>

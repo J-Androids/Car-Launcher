@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.PhoneAccountHandle;
@@ -169,24 +168,16 @@ public class InCallModel implements AudioModel, InCallServiceImpl.InCallListener
     public Intent getIntent() {
         Intent intent = null;
         if (isSelfManagedCall()) {
-            Bundle extras = mCurrentCall.getDetails().getExtras();
-            ComponentName componentName = extras == null ? null : extras.getParcelable(
-                    Intent.EXTRA_COMPONENT_NAME, ComponentName.class);
-            if (componentName != null) {
-                intent = new Intent();
-                intent.setComponent(componentName);
-            } else {
-                String callingAppPackageName = getCallingAppPackageName();
-                if (!TextUtils.isEmpty(callingAppPackageName)) {
-                    if (isCarAppCallingService(callingAppPackageName)) {
-                        intent = new Intent();
-                        intent.setComponent(
-                                new ComponentName(
-                                        callingAppPackageName, CAR_APP_ACTIVITY_INTERFACE));
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    } else {
-                        intent = mPackageManager.getLaunchIntentForPackage(callingAppPackageName);
-                    }
+            String callingAppPackageName = getCallingAppPackageName();
+            if (!TextUtils.isEmpty(callingAppPackageName)) {
+                if (isCarAppCallingService(callingAppPackageName)) {
+                    intent = new Intent();
+                    intent.setComponent(
+                             new ComponentName(
+                                    callingAppPackageName, CAR_APP_ACTIVITY_INTERFACE));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } else {
+                    intent = mPackageManager.getLaunchIntentForPackage(callingAppPackageName);
                 }
             }
         } else {
@@ -477,10 +468,21 @@ public class InCallModel implements AudioModel, InCallServiceImpl.InCallListener
     }
 
     private boolean isCarAppCallingService(String packageName) {
-        Intent intent =
+        // Check that app is integrated with CAL and handles calls
+        Intent serviceIntent =
                 new Intent(CAR_APP_SERVICE_INTERFACE)
                         .setPackage(packageName)
                         .addCategory(CAR_APP_CATEGORY_CALLING);
-        return !mPackageManager.queryIntentServices(intent, GET_RESOLVED_FILTER).isEmpty();
+
+        if (mPackageManager.queryIntentServices(serviceIntent, GET_RESOLVED_FILTER).isEmpty()) {
+            return false;
+        }
+
+        // Check that app has CAl activity
+        Intent activityIntent = new Intent();
+        activityIntent.setComponent(new ComponentName(packageName, CAR_APP_ACTIVITY_INTERFACE));
+
+        return mPackageManager
+                .resolveActivity(activityIntent, PackageManager.MATCH_DEFAULT_ONLY) != null;
     }
 }

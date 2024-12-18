@@ -40,6 +40,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.core.util.Consumer;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
@@ -57,19 +58,30 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
 
     private final CarActivityManager mCarActivityManager;
     private final Car mCar;
-    private final CarTaskViewControllerHostLifecycle mHostLifecycle;
     @SuppressLint("StaticFieldLeak") // We're not leaking this context as it is the window context.
     private final Context mWindowContext;
-    private final Intent mMapsIntent;
-    private final MutableLiveData<RemoteCarTaskView> mRemoteCarTaskView;
 
-    public CarLauncherViewModel(@UiContext Context context, @NonNull Intent mapsIntent) {
+    // Do not make this final because the maps intent can be changed based on the state of TOS.
+    private Intent mMapsIntent;
+    private CarTaskViewControllerHostLifecycle mHostLifecycle;
+    private MutableLiveData<RemoteCarTaskView> mRemoteCarTaskView;
+
+    public CarLauncherViewModel(@UiContext Context context) {
         mWindowContext = context.createWindowContext(TYPE_APPLICATION_STARTING, /* options */ null);
-        mMapsIntent = mapsIntent;
         mCar = Car.createCar(mWindowContext);
         mCarActivityManager = mCar.getCarManager(CarActivityManager.class);
-        mHostLifecycle = new CarTaskViewControllerHostLifecycle();
+    }
+
+    /**
+     * Initialize the remote car task view with the maps intent.
+     */
+    void initializeRemoteCarTaskView(@NonNull Intent mapsIntent) {
+        if (DEBUG) {
+            Log.d(TAG, "Maps intent in the task view = " + mapsIntent.getComponent());
+        }
+        mMapsIntent = mapsIntent;
         mRemoteCarTaskView = new MutableLiveData<>(null);
+        mHostLifecycle = new CarTaskViewControllerHostLifecycle();
         ControlledRemoteCarTaskViewCallback controlledRemoteCarTaskViewCallback =
                 new ControlledRemoteCarTaskViewCallbackImpl(mRemoteCarTaskView);
 
@@ -101,7 +113,15 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
         DefaultLifecycleObserver.super.onResume(owner);
-        mHostLifecycle.hostAppeared();
+        // Do not trigger 'hostAppeared()' in onResume.
+        // If the host Activity was hidden by an Activity, the Activity is moved to the other
+        // display, what the system expects would be the new moved Activity becomes the top one.
+        // But, at the time, the host Activity became visible and 'onResume()' is triggered.
+        // If 'hostAppeared()' is called in onResume, which moves the embeddedTask to the top and
+        // breaks the contract (the newly moved Activity becomes top).
+        // The contract is maintained by android.server.wm.multidisplay.MultiDisplayClientTests.
+        // BTW, if we don't invoke 'hostAppeared()', which makes the embedded task invisible if
+        // the host Activity gets the new Intent, so we'd call 'hostAppeared()' in onNewIntent.
     }
 
     @Override
@@ -121,6 +141,17 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
         mHostLifecycle.hostDestroyed();
         super.onCleared();
     }
+
+    public Consumer<Intent> getNewIntentListener() {
+        return mNewIntentConsumer;
+    }
+
+    private final Consumer<Intent> mNewIntentConsumer = new Consumer<Intent>() {
+        @Override
+        public void accept(Intent intent) {
+            mHostLifecycle.hostAppeared();
+        }
+    };
 
     private static final class ControlledRemoteCarTaskViewCallbackImpl implements
             ControlledRemoteCarTaskViewCallback {
@@ -198,17 +229,15 @@ public final class CarLauncherViewModel extends ViewModel implements DefaultLife
 
     static final class CarLauncherViewModelFactory implements ViewModelProvider.Factory {
         private final Context mContext;
-        private final Intent mMapsIntent;
 
-        CarLauncherViewModelFactory(@UiContext Context context, @NonNull Intent mapsIntent) {
-            mMapsIntent = requireNonNull(mapsIntent);
+        CarLauncherViewModelFactory(@UiContext Context context) {
             mContext = requireNonNull(context);
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(Class<T> modelClass) {
-            return modelClass.cast(new CarLauncherViewModel(mContext, mMapsIntent));
+            return modelClass.cast(new CarLauncherViewModel(mContext));
         }
     }
 }

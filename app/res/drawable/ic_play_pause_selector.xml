@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:state_enabled="true">
+        <vector
+            android:width="40dp"
+            android:height="40dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <path
+                android:fillColor="@color/car_surface"
+                android:pathData="M556.67,760L556.67,200L726.67,200L726.67,760L556.67,760ZM233.33,760L233.33,200L403.33,200L403.33,760L233.33,760Z"/>
+        </vector>
+    </item>
+    <item android:state_selected="false" android:state_enabled="true">
+        <vector
+            android:width="40dp"
+            android:height="40dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <path
+                android:fillColor="@color/car_surface"
+                android:pathData="M320,758L320,198L760,478L320,758Z"/>
+        </vector>
+    </item>
+    <item android:state_enabled="false">
+        <vector
+            android:width="40dp"
+            android:height="40dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <path
+                android:fillColor="@color/car_surface"
+                android:pathData="M642.67,557.33L328,247.33L328,198L768,478L642.67,557.33ZM792,895.33L528,630.67L328,758L328,430.67L65.33,167.33L112,120.67L840,848.67L792,895.33Z"/>
+        </vector>
+    </item>
+</selector>

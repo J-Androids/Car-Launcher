@@ -42,17 +42,17 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.carlauncher.AppGridActivity;
+import com.android.car.carlauncher.AppGridFragment;
 import com.android.car.carlauncher.AppGridPageSnapper.AppGridPageSnapCallback;
 import com.android.car.carlauncher.AppItemDragShadowBuilder;
 import com.android.car.carlauncher.AppMetaData;
 import com.android.car.carlauncher.R;
+import com.android.car.carlaunchercommon.toasts.NonDrivingOptimizedLaunchFailedToast;
 
 /**
  * App item view holder that contains the app icon and name.
@@ -98,18 +98,18 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
     public static class BindInfo {
         private final boolean mIsDistractionOptimizationRequired;
         private final Rect mPageBound;
-        private final AppGridActivity.Mode mMode;
+        private final AppGridFragment.Mode mMode;
 
         public BindInfo(boolean isDistractionOptimizationRequired,
                 Rect pageBound,
-                AppGridActivity.Mode mode) {
+                AppGridFragment.Mode mode) {
             this.mIsDistractionOptimizationRequired = isDistractionOptimizationRequired;
             this.mPageBound = pageBound;
             this.mMode = mode;
         }
 
         public BindInfo(boolean isDistractionOptimizationRequired, Rect pageBound) {
-            this(isDistractionOptimizationRequired, pageBound, AppGridActivity.Mode.ALL_APPS);
+            this(isDistractionOptimizationRequired, pageBound, AppGridFragment.Mode.ALL_APPS);
         }
     }
 
@@ -160,7 +160,7 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
         }
         boolean isDistractionOptimizationRequired = bindInfo.mIsDistractionOptimizationRequired;
         mPageBound = bindInfo.mPageBound;
-        AppGridActivity.Mode mode = bindInfo.mMode;
+        AppGridFragment.Mode mode = bindInfo.mMode;
 
         mHasAppMetadata = true;
         mAppItemView.setFocusable(true);
@@ -182,8 +182,8 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
         // previous page, so we need to rebind the app with the correct visibility.
         setStateSelected(mComponentName.equals(mDragCallback.mSelectedComponent));
 
-        boolean isLaunchableDistractionOptimized =
-                !isDistractionOptimizationRequired || app.getIsDistractionOptimized();
+        boolean isLaunchableDistractionOptimized = !isDistractionOptimizationRequired
+                || app.getIsDistractionOptimized();
         boolean isDisabledByTos = app.getIsDisabledByTos();
         boolean isLaunchable = isLaunchableDistractionOptimized || isDisabledByTos;
 
@@ -238,7 +238,7 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
                                 mActionDownX,
                                 mActionDownY,
                                 mode)) {
-                            startDragAndDrop(app.getComponentName(), event.getX(), event.getY());
+                            startDragAndDrop(app, event.getX(), event.getY());
                             mCanStartDragAction = false;
                         } else if (action == MotionEvent.ACTION_UP
                                 || action == MotionEvent.ACTION_CANCEL) {
@@ -253,14 +253,9 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
                 });
             }
         } else {
-            String warningText = mContext.getResources()
-                    .getString(R.string.driving_toast_text, app.getDisplayName());
-            View.OnClickListener appLaunchListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(mContext, warningText, Toast.LENGTH_LONG).show();
-                }
-            };
+            View.OnClickListener appLaunchListener = v ->
+                    NonDrivingOptimizedLaunchFailedToast.Companion.showToast(
+                            mContext, app.getDisplayName());
             mAppItemView.setOnClickListener(appLaunchListener);
             mAppIcon.setOnClickListener(appLaunchListener);
 
@@ -379,9 +374,9 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
 
 
     private boolean shouldStartDragAndDrop(MotionEvent event, float actionDownX,
-            float actionDownY, AppGridActivity.Mode mode) {
+            float actionDownY, AppGridFragment.Mode mode) {
         // If App Grid is not in all apps mode, we should not allow drag and drop
-        if (mode != AppGridActivity.Mode.ALL_APPS) {
+        if (mode != AppGridFragment.Mode.ALL_APPS) {
             return false;
         }
         // the move event should be with in the bounds of the app icon
@@ -395,18 +390,21 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
                 && isDistancePastThreshold;
     }
 
-    private void startDragAndDrop(ComponentName componentName, float eventX, float eventY) {
+    private void startDragAndDrop(AppMetaData app, float eventX, float eventY) {
         ClipData clipData = ClipData.newPlainText(/* label= */ APP_ITEM_DRAG_TAG,
-                /* text= */ componentName.flattenToString());
+                /* text= */ app.getComponentName().flattenToString());
 
         // since the app icon is scaled, the touch point that users should be holding when drag
         // shadow is deployed should also be scaled
         Point dragPoint = new Point(/* x */ (int) (eventX / mIconSize * mIconScaledSize),
                 /* y */ (int) (eventY / mIconSize * mIconScaledSize));
 
-        AppItemDragShadowBuilder dragShadowBuilder = new AppItemDragShadowBuilder(mAppIcon,
+        Drawable appIcon = app.getIcon();
+        if (appIcon.getConstantState() == null) return;
+        AppItemDragShadowBuilder dragShadowBuilder = new AppItemDragShadowBuilder(
+                appIcon.getConstantState().newDrawable().mutate(),
                 /* touchPointX */ dragPoint.x, /* touchPointX */ dragPoint.y,
-                /* size */ mIconSize, /* scaledSize */ mIconScaledSize);
+                /* scaledSize */ mIconScaledSize);
         mAppIcon.startDragAndDrop(clipData, /* dragShadowBuilder */ dragShadowBuilder,
                 /* myLocalState */ null, /* flags */ DRAG_FLAG_OPAQUE | DRAG_FLAG_GLOBAL
                         | DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);

@@ -16,6 +16,7 @@
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_system_experience",
 }
 
 android_test {
@@ -27,7 +28,7 @@ android_test {
 
     libs: [
         "android.car",
-        "android.test.base",
+        "android.test.base.stubs.system",
         "android.car-system-stubs",
     ],
 
@@ -54,6 +55,9 @@ android_test {
         "flag-junit",
     ],
 
+    // b/341652226: temporarily disable multi-dex until D8 is fixed
+    no_dex_container: true,
+
     platform_apis: true,
 
     certificate: "platform",
@@ -78,4 +82,6 @@ android_test {
         "automotive-tests",
         "device-tests",
     ],
+    // TODO(b/319708040): re-enable use_resource_processor
+    use_resource_processor: false,
 }

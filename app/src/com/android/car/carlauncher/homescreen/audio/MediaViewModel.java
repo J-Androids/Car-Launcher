@@ -16,11 +16,9 @@
 
 package com.android.car.carlauncher.homescreen.audio;
 
-import static android.car.media.CarMediaIntents.EXTRA_MEDIA_COMPONENT;
 import static android.car.media.CarMediaManager.MEDIA_SOURCE_MODE_PLAYBACK;
 
 import android.app.Application;
-import android.car.media.CarMediaIntents;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -33,6 +31,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.Observer;
 
 import com.android.car.apps.common.imaging.ImageBinder;
+import com.android.car.carlauncher.Flags;
+import com.android.car.carlauncher.MediaSessionUtils;
 import com.android.car.carlauncher.homescreen.HomeCardInterface;
 import com.android.car.carlauncher.homescreen.ui.CardContent;
 import com.android.car.carlauncher.homescreen.ui.CardHeader;
@@ -42,11 +42,11 @@ import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
 import com.android.car.media.common.playback.PlaybackProgress;
 import com.android.car.media.common.playback.PlaybackViewModel;
+import com.android.car.media.common.source.MediaModels;
 import com.android.car.media.common.source.MediaSource;
 import com.android.car.media.common.source.MediaSourceColors;
 import com.android.car.media.common.source.MediaSourceViewModel;
 import com.android.internal.annotations.VisibleForTesting;
-
 
 /**
  * ViewModel for media. Uses both a {@link MediaSourceViewModel} and a {@link PlaybackViewModel}
@@ -136,13 +136,24 @@ public class MediaViewModel extends AndroidViewModel implements AudioModel {
 
     @Override
     public void onCreate(@NonNull Context context) {
-        if (mSourceViewModel == null) {
-            mSourceViewModel = MediaSourceViewModel.get(getApplication(),
-                    MEDIA_SOURCE_MODE_PLAYBACK);
-        }
-        if (mPlaybackViewModel == null) {
-            mPlaybackViewModel = PlaybackViewModel.get(getApplication(),
-                    MEDIA_SOURCE_MODE_PLAYBACK);
+        // Initialize media data with media session sources or mbt sources
+        if (Flags.mediaSessionCard()) {
+            MediaModels mediaModels = MediaSessionUtils.getMediaModels(context);
+            if (mSourceViewModel == null) {
+                mSourceViewModel = mediaModels.getMediaSourceViewModel();
+            }
+            if (mPlaybackViewModel == null) {
+                mPlaybackViewModel = mediaModels.getPlaybackViewModel();
+            }
+        } else {
+            if (mSourceViewModel == null) {
+                mSourceViewModel = MediaSourceViewModel.get(getApplication(),
+                        MEDIA_SOURCE_MODE_PLAYBACK);
+            }
+            if (mPlaybackViewModel == null) {
+                mPlaybackViewModel = PlaybackViewModel.get(getApplication(),
+                        MEDIA_SOURCE_MODE_PLAYBACK);
+            }
         }
 
         mContext = context;
@@ -177,20 +188,21 @@ public class MediaViewModel extends AndroidViewModel implements AudioModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-        mSourceViewModel.getPrimaryMediaSource().removeObserver(mMediaSourceObserver);
-        mPlaybackViewModel.getMetadata().removeObserver(mMetadataObserver);
-        mPlaybackViewModel.getPlaybackStateWrapper().removeObserver(mPlaybackStateWrapperObserver);
+        if (mSourceViewModel != null) {
+            mSourceViewModel.getPrimaryMediaSource().removeObserver(mMediaSourceObserver);
+        }
+        if (mPlaybackViewModel != null) {
+            mPlaybackViewModel.getMetadata().removeObserver(mMetadataObserver);
+            mPlaybackViewModel.getPlaybackStateWrapper().removeObserver(
+                    mPlaybackStateWrapperObserver);
+        }
     }
 
     @Override
     public Intent getIntent() {
         MediaSource mediaSource = getMediaSourceViewModel().getPrimaryMediaSource().getValue();
-        Intent intent = new Intent(CarMediaIntents.ACTION_MEDIA_TEMPLATE);
-        if (mediaSource != null) {
-            intent.putExtra(EXTRA_MEDIA_COMPONENT,
-                    mediaSource.getBrowseServiceComponentName().flattenToString());
-        }
-        return intent;
+
+        return mediaSource != null ? mediaSource.getIntent() : null;
     }
 
     @Override
