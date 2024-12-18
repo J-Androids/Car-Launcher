@@ -206,7 +206,8 @@ class DockItemViewHolder(
         dockItemClickListener = DockItemClickListener(
             dockController,
             dockAppItem,
-            isRestricted = !dockAppItem.isDistractionOptimized && isUxRestrictionEnabled
+            isRestricted = !dockAppItem.isDistractionOptimized && isUxRestrictionEnabled &&
+              !hasActiveMediaSessions
         )
         appIcon.setOnClickListener(dockItemClickListener)
         setUxRestrictions(dockAppItem, isUxRestrictionEnabled)

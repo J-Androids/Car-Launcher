@@ -24,7 +24,6 @@
     <color name="recents_background_color">@*android:color/car_grey_900</color>
     <color name="default_recents_thumbnail_color">@*android:color/car_grey_846</color>
     <color name="clear_all_recents_text_color">@*android:color/car_accent</color>
-    <color name="media_card_subtitle_color">@color/car_on_surface_40</color>
 
     <!-- CarUiPortraitLauncherReferenceRRO relies on overlaying these values -->
     <color name="media_button_tint">@*android:color/car_tint</color>

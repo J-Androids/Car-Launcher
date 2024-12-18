@@ -25,8 +25,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.carlauncher.pagination.PageIndexingHelper;
 import com.android.car.carlauncher.recyclerview.AppGridAdapter;
@@ -37,18 +38,18 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 public class AppGridAdapterTest {
-
-    @Mock public Context mMockContext;
-    @Mock public LayoutInflater mMockLayoutInflater;
-    @Mock public LauncherViewModel mMockLauncherModel;
-    @Mock public AppItemViewHolder.AppItemDragCallback mMockDragCallback;
-    @Mock public AppGridPageSnapper.AppGridPageSnapCallback mMockSnapCallback;
-    @Mock public Rect mMockPageBound;
+    private final Context mContext =
+            InstrumentationRegistry.getInstrumentation().getTargetContext();
+    @Mock
+    public AppItemViewHolder.AppItemDragCallback mMockDragCallback;
+    @Mock
+    public AppGridPageSnapper.AppGridPageSnapCallback mMockSnapCallback;
+    @Mock
+    public Rect mMockPageBound;
     public AppGridAdapter mTestAppGridAdapter;
 
     @Before
     public void setUp() throws Exception {
-        mMockLauncherModel = mock(LauncherViewModel.class);
         mMockDragCallback = mock(AppItemViewHolder.AppItemDragCallback.class);
         mMockSnapCallback = mock(AppGridPageSnapper.AppGridPageSnapCallback.class);
     }
@@ -57,9 +58,9 @@ public class AppGridAdapterTest {
     public void testPageRounding_getItemCount_getPageCount() {
         int numOfCols = 5;
         int numOfRows = 3;
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);
@@ -85,9 +86,9 @@ public class AppGridAdapterTest {
         numOfCols = 4;
         numOfRows = 6;
 
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);
@@ -114,9 +115,9 @@ public class AppGridAdapterTest {
         // an adapter with 45 items
         int numOfCols = 5;
         int numOfRows = 3;
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);
@@ -149,9 +150,9 @@ public class AppGridAdapterTest {
         // an adapter with 45 items
         int numOfRows = 5;
         int numOfCols = 3;
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                /* pageOrientation */ PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);
@@ -192,9 +193,9 @@ public class AppGridAdapterTest {
         // an adapter with 40 items, 3 page, and 5 padded empty items
         int numOfCols = 5;
         int numOfRows = 3;
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);
@@ -245,9 +246,9 @@ public class AppGridAdapterTest {
         // an adapter with 44 items, 3 page, and 16 padded empty items
         int numOfCols = 4;
         int numOfRows = 5;
-        mTestAppGridAdapter = new AppGridAdapter(mMockContext, numOfCols, numOfRows,
-                PageOrientation.HORIZONTAL,
-                mMockLayoutInflater, mMockLauncherModel, mMockDragCallback, mMockSnapCallback);
+        mTestAppGridAdapter = new AppGridAdapter(mContext, numOfCols, numOfRows,
+                mMockDragCallback, mMockSnapCallback,
+                mock(AppGridAdapter.AppGridAdapterListener.class), AppGridFragment.Mode.ALL_APPS);
         mTestAppGridAdapter.updateViewHolderDimensions(mMockPageBound,
                 /* appItemWidth */ 260, /* appItemHeight */ 200);
         mTestAppGridAdapter = spy(mTestAppGridAdapter);

@@ -26,8 +26,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import androidx.savedstate.SavedStateRegistryOwner
-import com.android.car.carlauncher.AppGridActivity.APP_TYPE_LAUNCHABLES
-import com.android.car.carlauncher.AppGridActivity.Mode
+import com.android.car.carlauncher.AppGridFragment.AppTypes.Companion.APP_TYPE_LAUNCHABLES
+import com.android.car.carlauncher.AppGridFragment.Mode
 import com.android.car.carlauncher.repositories.AppGridRepository
 import java.time.Clock
 import java.util.concurrent.TimeUnit
@@ -81,7 +81,7 @@ class AppGridViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppList(): Flow<List<AppItem>> {
         return appMode.transformLatest {
-            val sourceList = if (it.mAppTypes and APP_TYPE_LAUNCHABLES == 1) {
+            val sourceList = if (it.appTypes and APP_TYPE_LAUNCHABLES == 1) {
                 allAppsItemList
             } else {
                 mediaOnlyList
@@ -172,7 +172,6 @@ class AppGridViewModel(
 
     /**
      * Updates the current application display mode. This triggers UI updates in the app grid.
-     *
      * @param mode The new Mode to set for the application grid.
      */
     fun updateMode(mode: Mode) {

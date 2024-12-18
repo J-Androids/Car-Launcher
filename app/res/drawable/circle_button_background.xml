@@ -14,7 +14,12 @@
   ~ limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@color/car_surface"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape
+            android:shape="oval">
+            <solid android:color="@color/car_surface_container_highest"/>
+        </shape>
+    </item>
+    <item android:drawable="@drawable/button_ripple"/>
+</layer-list>

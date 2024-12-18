@@ -15,7 +15,7 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true">
+    <item android:state_selected="true" android:state_enabled="true">
         <vector
             android:width="40dp"
             android:height="40dp"
@@ -26,7 +26,7 @@
                 android:pathData="M556.67,760L556.67,200L726.67,200L726.67,760L556.67,760ZM233.33,760L233.33,200L403.33,200L403.33,760L233.33,760Z"/>
         </vector>
     </item>
-    <item android:state_selected="false">
+    <item android:state_selected="false" android:state_enabled="true">
         <vector
             android:width="40dp"
             android:height="40dp"
@@ -35,6 +35,17 @@
             <path
                 android:fillColor="@color/car_surface"
                 android:pathData="M320,758L320,198L760,478L320,758Z"/>
+        </vector>
+    </item>
+    <item android:state_enabled="false">
+        <vector
+            android:width="40dp"
+            android:height="40dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <path
+                android:fillColor="@color/car_surface"
+                android:pathData="M642.67,557.33L328,247.33L328,198L768,478L642.67,557.33ZM792,895.33L528,630.67L328,758L328,430.67L65.33,167.33L112,120.67L840,848.67L792,895.33Z"/>
         </vector>
     </item>
 </selector>

@@ -32,6 +32,7 @@ import androidx.lifecycle.Observer;
 
 import com.android.car.apps.common.imaging.ImageBinder;
 import com.android.car.carlauncher.Flags;
+import com.android.car.carlauncher.MediaSessionUtils;
 import com.android.car.carlauncher.homescreen.HomeCardInterface;
 import com.android.car.carlauncher.homescreen.ui.CardContent;
 import com.android.car.carlauncher.homescreen.ui.CardHeader;
@@ -137,7 +138,7 @@ public class MediaViewModel extends AndroidViewModel implements AudioModel {
     public void onCreate(@NonNull Context context) {
         // Initialize media data with media session sources or mbt sources
         if (Flags.mediaSessionCard()) {
-            MediaModels mediaModels = new MediaModels(context);
+            MediaModels mediaModels = MediaSessionUtils.getMediaModels(context);
             if (mSourceViewModel == null) {
                 mSourceViewModel = mediaModels.getMediaSourceViewModel();
             }

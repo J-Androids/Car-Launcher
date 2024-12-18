@@ -32,5 +32,5 @@
         android:includeFontPadding="false"
         android:text="@string/media_card_queue_header_title"
         android:textAppearance="@style/TextAppearance.Car.Body.Small"
-        android:textColor="@color/car_on_surface"/>
+        android:textColor="@color/car_text_primary"/>
 </LinearLayout>

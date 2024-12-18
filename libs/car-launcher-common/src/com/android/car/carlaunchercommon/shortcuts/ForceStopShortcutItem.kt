@@ -18,15 +18,12 @@ package com.android.car.carlaunchercommon.shortcuts
 
 import android.app.Activity
 import android.app.ActivityManager
-import android.app.AlertDialog
-import android.app.Application.ActivityLifecycleCallbacks
 import android.app.admin.DevicePolicyManager
 import android.car.media.CarMediaManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
@@ -58,44 +55,6 @@ open class ForceStopShortcutItem(
         private val DEBUG = isDebuggable()
     }
 
-    private var forceStopDialog: AlertDialog? = null
-
-    init {
-        // todo(b/323021079): Close alertdialog on Fragment's onPause
-        if (context is Activity) {
-            context.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
-                override fun onActivityCreated(p0: Activity, p1: Bundle?) {
-                    // no-op
-                }
-
-                override fun onActivityStarted(p0: Activity) {
-                    // no-op
-                }
-
-                override fun onActivityResumed(p0: Activity) {
-                    // no-op
-                }
-
-                override fun onActivityPaused(p0: Activity) {
-                    forceStopDialog?.dismiss()
-                    forceStopDialog = null
-                }
-
-                override fun onActivityStopped(p0: Activity) {
-                    // no-op
-                }
-
-                override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {
-                    // no-op
-                }
-
-                override fun onActivityDestroyed(p0: Activity) {
-                    // no-op
-                }
-            })
-        }
-    }
-
     override fun data(): CarUiShortcutsPopup.ItemData {
         return CarUiShortcutsPopup.ItemData(
             R.drawable.ic_force_stop_caution_icon,
@@ -117,8 +76,13 @@ open class ForceStopShortcutItem(
                 null // listener
             )
         builder.create().let {
-            it.window?.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT)
-            forceStopDialog = it
+            if (context !is Activity || context.window.decorView.windowToken == null) {
+                // If the context is not an Activity or lacks a valid window token,
+                // it's likely we're in a non-Activity context (e.g., Service, SystemUI).
+                // To ensure the AlertDialog is displayed properly, we explicitly set its window
+                // type to SYSTEM_ALERT, allowing it to overlay other windows, even from SystemUI.
+                it.window?.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT)
+            }
             it.show()
         }
         return true

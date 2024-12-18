@@ -14,6 +14,11 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha=".4" android:color="@color/car_on_surface" />
-</selector>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/car_ui_ripple_color">
+    <item android:id="@android:id/mask">
+        <shape android:shape="oval">
+            <solid android:color="@color/car_ui_ripple_color"/>
+        </shape>
+    </item>
+</ripple>

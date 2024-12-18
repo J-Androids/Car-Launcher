@@ -75,6 +75,8 @@
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE"/>
     <!-- Permission to read navigation state -->
     <uses-permission android:name="android.car.permission.CAR_MONITOR_CLUSTER_NAVIGATION_STATE"/>
+    <!-- Permission to read notifications -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATIONS"/>
 
     <!-- To connect to media browser services in other apps, media browser clients
     that target Android 11 need to add the following in their manifest -->
@@ -102,6 +104,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.HOME"/>
+                <category android:name="android.intent.category.SECONDARY_HOME" />
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER_APP"/>
             </intent-filter>

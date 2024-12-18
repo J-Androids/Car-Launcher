@@ -16,6 +16,7 @@
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
+    default_team: "trendy_team_system_experience",
 }
 
 android_test {
@@ -53,6 +54,9 @@ android_test {
         "CarLauncher-core",
         "flag-junit",
     ],
+
+    // b/341652226: temporarily disable multi-dex until D8 is fixed
+    no_dex_container: true,
 
     platform_apis: true,
 

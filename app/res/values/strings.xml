@@ -60,5 +60,5 @@
 
     <!-- Fullscreen media card strings -->
     <string name="media_card_queue_header_title">Queue</string>
-    <string name="media_card_history_header_title">Jump back in</string>
+    <string name="media_card_history_header_title">Media Source</string>
 </resources>
