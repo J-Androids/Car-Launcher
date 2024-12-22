@@ -24,7 +24,7 @@
         android:visibility="gone"
         android:id="@+id/overflow_grid"
         android:stretchColumns="0,1"
-        android:background="@color/car_surface">
+        android:background="@color/car_surface_container_highest">
         <TableRow
             android:layout_weight="1"
             android:gravity="center">
@@ -92,7 +92,7 @@
         android:layout_height="match_parent"
         android:paddingStart="@dimen/media_card_horizontal_margin"
         android:paddingEnd="@dimen/media_card_horizontal_margin"
-        android:background="@color/car_surface"
+        android:background="@color/car_surface_container_highest"
         android:visibility="gone">
         <com.android.car.apps.common.CarUiRecyclerViewNoScrollbar
             android:id="@+id/queue_list"
@@ -107,7 +107,7 @@
         android:id="@+id/history_list_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/car_surface"
+        android:background="@color/car_surface_container_highest"
         android:visibility="gone">
         <com.android.car.apps.common.CarUiRecyclerViewNoScrollbar
             android:id="@+id/history_list"

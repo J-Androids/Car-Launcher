@@ -64,7 +64,7 @@ public class CarLauncherViewModelFactoryTest extends AbstractExtendedMockitoTest
                 .createWindowContext(TYPE_APPLICATION_STARTING, /* options */ null);
         when(mContext.createWindowContext(eq(WindowManager.LayoutParams.TYPE_APPLICATION_STARTING),
                 any())).thenReturn(windowContext);
-        mCarLauncherViewModelFactory = new CarLauncherViewModelFactory(mContext, mIntent);
+        mCarLauncherViewModelFactory = new CarLauncherViewModelFactory(mContext);
     }
 
     @After

@@ -16,11 +16,15 @@
 
 package com.android.car.carlauncher.repositories
 
+import android.Manifest.permission.MANAGE_OWN_CALLS
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
+import android.os.UserManager
+import android.util.Log
 import com.android.car.carlauncher.AppItem
 import com.android.car.carlauncher.AppMetaData
 import com.android.car.carlauncher.datasources.AppOrderDataSource
@@ -111,8 +115,12 @@ class AppGridRepositoryImpl(
     private val packageManager: PackageManager,
     private val appLaunchFactory: AppLaunchProviderFactory,
     private val appShortcutsFactory: AppShortcutsFactory,
+    userManager: UserManager,
     private val bgDispatcher: CoroutineDispatcher
 ) : AppGridRepository {
+
+    private val isVisibleBackgroundUser = !userManager.isUserForeground &&
+        userManager.isUserVisible && !userManager.isProfile
 
     /**
      * Provides a flow of all apps in the app grid.
@@ -134,6 +142,8 @@ class AppGridRepositoryImpl(
                 it.componentName.packageName in alreadyAddedComponents
             }).sortedWith { a1, a2 ->
                 order.compare(a1.appOrderInfo, a2.appOrderInfo)
+            }.filter {
+                !shouldHideApp(it)
             }.map {
                 if (mirroringSession.packageName == it.componentName.packageName) {
                     it.redirectIntent = mirroringSession.launchIntent
@@ -274,5 +284,26 @@ class AppGridRepositoryImpl(
 
     private fun List<AppItem>.toAppOrderInfoList(): List<AppOrderInfo> {
         return map { AppOrderInfo(it.packageName, it.className, it.displayName.toString()) }
+    }
+
+    private fun shouldHideApp(appInfo: AppInfo): Boolean {
+        // Disable telephony apps for MUMD passenger since accepting a call will
+        // drop the driver's call.
+        if (isVisibleBackgroundUser) {
+            return try {
+                packageManager.getPackageInfo(
+                    appInfo.componentName.packageName, PackageManager.GET_PERMISSIONS)
+                    .requestedPermissions?.any {it == MANAGE_OWN_CALLS} ?: false
+            } catch (e: NameNotFoundException) {
+                Log.e(TAG, "Unable to query app permissions for $appInfo $e")
+                false
+            }
+        }
+
+        return false
+    }
+
+    companion object {
+        const val TAG = "AppGridRepository"
     }
 }

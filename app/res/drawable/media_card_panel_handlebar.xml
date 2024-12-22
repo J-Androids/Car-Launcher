@@ -20,7 +20,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="16dp"/>
-            <solid android:color="@color/car_on_surface_40"/>
+            <solid android:color="@color/car_on_surface_variant"/>
         </shape>
     </item>
 </ripple>

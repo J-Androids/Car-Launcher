@@ -39,6 +39,7 @@
         <item>com.android.car.media/com.android.car.media.MediaDispatcherActivity</item>
         <item>com.android.car.media/com.android.car.media.MediaBlockingActivity</item>
         <item>com.android.systemui/com.android.systemui.car.wm.activity.LaunchOnPrivateDisplayRouterActivity</item>
+        <item>com.android.car.settings/com.android.car.settings.sound.AudioRouteSelectionActivity</item>
     </string-array>
 
     <!--

@@ -47,7 +47,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.carlauncher.AppGridActivity;
+import com.android.car.carlauncher.AppGridFragment;
 import com.android.car.carlauncher.AppGridPageSnapper.AppGridPageSnapCallback;
 import com.android.car.carlauncher.AppItemDragShadowBuilder;
 import com.android.car.carlauncher.AppMetaData;
@@ -98,18 +98,18 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
     public static class BindInfo {
         private final boolean mIsDistractionOptimizationRequired;
         private final Rect mPageBound;
-        private final AppGridActivity.Mode mMode;
+        private final AppGridFragment.Mode mMode;
 
         public BindInfo(boolean isDistractionOptimizationRequired,
                 Rect pageBound,
-                AppGridActivity.Mode mode) {
+                AppGridFragment.Mode mode) {
             this.mIsDistractionOptimizationRequired = isDistractionOptimizationRequired;
             this.mPageBound = pageBound;
             this.mMode = mode;
         }
 
         public BindInfo(boolean isDistractionOptimizationRequired, Rect pageBound) {
-            this(isDistractionOptimizationRequired, pageBound, AppGridActivity.Mode.ALL_APPS);
+            this(isDistractionOptimizationRequired, pageBound, AppGridFragment.Mode.ALL_APPS);
         }
     }
 
@@ -160,7 +160,7 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
         }
         boolean isDistractionOptimizationRequired = bindInfo.mIsDistractionOptimizationRequired;
         mPageBound = bindInfo.mPageBound;
-        AppGridActivity.Mode mode = bindInfo.mMode;
+        AppGridFragment.Mode mode = bindInfo.mMode;
 
         mHasAppMetadata = true;
         mAppItemView.setFocusable(true);
@@ -374,9 +374,9 @@ public class AppItemViewHolder extends RecyclerView.ViewHolder {
 
 
     private boolean shouldStartDragAndDrop(MotionEvent event, float actionDownX,
-            float actionDownY, AppGridActivity.Mode mode) {
+            float actionDownY, AppGridFragment.Mode mode) {
         // If App Grid is not in all apps mode, we should not allow drag and drop
-        if (mode != AppGridActivity.Mode.ALL_APPS) {
+        if (mode != AppGridFragment.Mode.ALL_APPS) {
             return false;
         }
         // the move event should be with in the bounds of the app icon

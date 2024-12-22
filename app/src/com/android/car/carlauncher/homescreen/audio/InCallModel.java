@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.PhoneAccountHandle;
@@ -169,24 +168,16 @@ public class InCallModel implements AudioModel, InCallServiceImpl.InCallListener
     public Intent getIntent() {
         Intent intent = null;
         if (isSelfManagedCall()) {
-            Bundle extras = mCurrentCall.getDetails().getExtras();
-            ComponentName componentName = extras == null ? null : extras.getParcelable(
-                    Intent.EXTRA_COMPONENT_NAME, ComponentName.class);
-            if (componentName != null) {
-                intent = new Intent();
-                intent.setComponent(componentName);
-            } else {
-                String callingAppPackageName = getCallingAppPackageName();
-                if (!TextUtils.isEmpty(callingAppPackageName)) {
-                    if (isCarAppCallingService(callingAppPackageName)) {
-                        intent = new Intent();
-                        intent.setComponent(
-                                new ComponentName(
-                                        callingAppPackageName, CAR_APP_ACTIVITY_INTERFACE));
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    } else {
-                        intent = mPackageManager.getLaunchIntentForPackage(callingAppPackageName);
-                    }
+            String callingAppPackageName = getCallingAppPackageName();
+            if (!TextUtils.isEmpty(callingAppPackageName)) {
+                if (isCarAppCallingService(callingAppPackageName)) {
+                    intent = new Intent();
+                    intent.setComponent(
+                             new ComponentName(
+                                    callingAppPackageName, CAR_APP_ACTIVITY_INTERFACE));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } else {
+                    intent = mPackageManager.getLaunchIntentForPackage(callingAppPackageName);
                 }
             }
         } else {

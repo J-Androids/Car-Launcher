@@ -18,6 +18,7 @@ package com.android.car.carlauncher.homescreen;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.RootMatchers.hasWindowLayoutParams;
 import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -31,25 +32,30 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.drawable.Drawable;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.Suppress;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.carlauncher.CarLauncher;
+import com.android.car.carlauncher.Flags;
 import com.android.car.carlauncher.R;
 import com.android.car.carlauncher.homescreen.ui.CardHeader;
 import com.android.car.carlauncher.homescreen.ui.DescriptiveTextView;
 import com.android.car.carlauncher.homescreen.ui.DescriptiveTextWithControlsView;
 import com.android.car.carlauncher.homescreen.ui.TextBlockView;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@Suppress // To be ignored until b/224978827 is fixed
 @RunWith(AndroidJUnit4.class)
 public class HomeCardFragmentTest {
 
@@ -71,90 +77,134 @@ public class HomeCardFragmentTest {
     private static final TextBlockView TEXT_BLOCK_VIEW_NO_FOOTER = new TextBlockView(
             TEXT_BLOCK_CONTENT);
 
+    private FragmentActivity mActivity;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
     @Rule
     public ActivityTestRule<CarLauncher> mActivityTestRule = new ActivityTestRule<CarLauncher>(
             CarLauncher.class);
 
+    @Before
+    public void setUp() {
+        mActivity = mActivityTestRule.getActivity();
+        mActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+            }
+        });
+    }
+
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIA_CARD_FULLSCREEN)
     public void updateContentView_descriptiveTextWithFooter_displaysTapForMoreView() {
-        HomeCardFragment fragment = (HomeCardFragment) mActivityTestRule.getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.top_card);
+        HomeCardFragment fragment = (HomeCardFragment) mActivity.getSupportFragmentManager()
+                .findFragmentById(R.id.top_card);
         fragment.updateHeaderView(CARD_HEADER);
         fragment.updateContentView(DESCRIPTIVE_TEXT_VIEW);
 
         onView(allOf(withId(R.id.descriptive_text_layout),
-                isDescendantOfA(withId(R.id.top_card)))).check(
-                matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.primary_text), withText(DESCRIPTIVE_TEXT_TITLE),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.secondary_text), withText(DESCRIPTIVE_TEXT_SUBTITLE),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.tap_for_more_text), withText(DESCRIPTIVE_TEXT_FOOTER),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIA_CARD_FULLSCREEN)
     public void updateContentView_descriptiveTextWithNoFooter_hidesTapForMoreView() {
-        HomeCardFragment fragment = (HomeCardFragment) mActivityTestRule.getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.top_card);
+        HomeCardFragment fragment = (HomeCardFragment) mActivity.getSupportFragmentManager()
+                .findFragmentById(R.id.top_card);
         fragment.updateHeaderView(CARD_HEADER);
         fragment.updateContentView(DESCRIPTIVE_TEXT_VIEW_NO_FOOTER);
 
         onView(allOf(withId(R.id.descriptive_text_layout),
-                isDescendantOfA(withId(R.id.top_card)))).check(
-                matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.primary_text), withText(DESCRIPTIVE_TEXT_TITLE),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.secondary_text), withText(DESCRIPTIVE_TEXT_SUBTITLE),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.tap_for_more_text),
                 isDescendantOfA(withId(R.id.descriptive_text_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(not(isDisplayed())));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(not(isDisplayed())));
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIA_CARD_FULLSCREEN)
     public void updateContentView_textBlockWithFooter_displaysTapForMoreView() {
-        HomeCardFragment fragment = (HomeCardFragment) mActivityTestRule.getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.top_card);
+        HomeCardFragment fragment = (HomeCardFragment) mActivity.getSupportFragmentManager()
+                .findFragmentById(R.id.top_card);
         fragment.updateHeaderView(CARD_HEADER);
         fragment.updateContentView(TEXT_BLOCK_VIEW);
 
-        onView(allOf(withId(R.id.text_block_layout), isDescendantOfA(withId(R.id.top_card)))).check(
-                matches(isDisplayed()));
+        onView(allOf(withId(R.id.text_block_layout), isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.text_block), withText(TEXT_BLOCK_CONTENT),
                 isDescendantOfA(withId(R.id.text_block_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.tap_for_more_text), withText(TEXT_BLOCK_FOOTER),
                 isDescendantOfA(withId(R.id.text_block_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIA_CARD_FULLSCREEN)
     public void updateContentView_textBlockNoFooter_hidesTapForMoreView() {
-        HomeCardFragment fragment = (HomeCardFragment) mActivityTestRule.getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.top_card);
+        HomeCardFragment fragment = (HomeCardFragment) mActivity.getSupportFragmentManager()
+                .findFragmentById(R.id.top_card);
         fragment.updateHeaderView(CARD_HEADER);
         fragment.updateContentView(TEXT_BLOCK_VIEW_NO_FOOTER);
 
-        onView(allOf(withId(R.id.text_block_layout), isDescendantOfA(withId(R.id.top_card)))).check(
-                matches(isDisplayed()));
+        onView(allOf(withId(R.id.text_block_layout), isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.text_block), withText(TEXT_BLOCK_CONTENT),
                 isDescendantOfA(withId(R.id.text_block_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(isDisplayed()));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(isDisplayed()));
         onView(allOf(withId(R.id.tap_for_more_text),
                 isDescendantOfA(withId(R.id.text_block_layout)),
-                isDescendantOfA(withId(R.id.top_card)))).check(matches(not(isDisplayed())));
+                isDescendantOfA(withId(R.id.top_card))))
+                .inRoot(hasWindowLayoutParams())
+                .check(matches(not(isDisplayed())));
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIA_CARD_FULLSCREEN)
     public void updateControlBarButton_updatesButtonSelectedState() {
-        HomeCardFragment fragment = (HomeCardFragment) mActivityTestRule.getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.top_card);
+        HomeCardFragment fragment = (HomeCardFragment) mActivity.getSupportFragmentManager()
+                .findFragmentById(R.id.top_card);
         assertNotNull(fragment);
 
         ImageButton leftImageButton = mock(ImageButton.class);
