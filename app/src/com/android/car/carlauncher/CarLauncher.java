@@ -40,10 +40,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.collection.ArraySet;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+<<<<<<< HEAD
 
 import com.android.car.carlauncher.homescreen.HomeCardModule;
 import com.android.car.carlauncher.homescreen.audio.IntentHandler;
@@ -54,6 +56,20 @@ import com.android.wm.shell.taskview.TaskView;
 
 import com.google.common.annotations.VisibleForTesting;
 
+=======
+
+import com.android.car.carlauncher.homescreen.HomeCardModule;
+import com.android.car.carlauncher.homescreen.audio.IntentHandler;
+import com.android.car.carlauncher.homescreen.audio.MediaLaunchHandler;
+import com.android.car.carlauncher.homescreen.audio.dialer.InCallIntentRouter;
+import com.android.car.carlauncher.homescreen.audio.media.MediaLaunchRouter;
+import com.android.car.carlauncher.taskstack.TaskStackChangeListeners;
+import com.android.car.internal.common.UserHelperLite;
+import com.android.car.media.common.source.MediaSource;
+import com.android.wm.shell.taskview.TaskView;
+
+import com.google.common.annotations.VisibleForTesting;
+>>>>>>> PATCH
 import java.util.Set;
 
 /**
@@ -120,6 +136,17 @@ public class CarLauncher extends FragmentActivity {
         }
     };
 
+    // Used instead of IntentHandler because media apps may provide a PendingIntent instead
+    private final MediaLaunchHandler mMediaMediaLaunchHandler = new MediaLaunchHandler() {
+        @Override
+        public void handleLaunchMedia(@NonNull MediaSource mediaSource) {
+            if (DEBUG) {
+                Log.d(TAG, "Launching media source " + mediaSource);
+            }
+            mediaSource.launchActivity(CarLauncher.this, ActivityOptions.makeBasic());
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -170,6 +197,7 @@ public class CarLauncher extends FragmentActivity {
                 getSupportFragmentManager().beginTransaction().replace(R.id.maps_card,
                         AppGridFragment.newInstance(ALL_APPS)).commit();
 
+<<<<<<< HEAD
             }
         }
 
@@ -178,6 +206,17 @@ public class CarLauncher extends FragmentActivity {
         setupContentObserversForTos();
     }
 
+=======
+            }
+        }
+
+        MediaLaunchRouter.getInstance().registerMediaLaunchHandler(mMediaMediaLaunchHandler);
+        InCallIntentRouter.getInstance().registerInCallIntentHandler(mIntentHandler);
+
+        initializeCards();
+        setupContentObserversForTos();
+    }
+>>>>>>> PATCH
     private void setupRemoteCarTaskView(ViewGroup parent) {
         mCarLauncherViewModel = new ViewModelProvider(this,
                 new CarLauncherViewModelFactory(this))
