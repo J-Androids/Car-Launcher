@@ -30,4 +30,6 @@ jobs:
         git clone -b main https://android.googlesource.com/platform/prebuilts/build-tools /home/prebuilts/build-tools
         # sudo apt install -y tree && tree /home/prebuilts/build-tools
     - name: Build with Gradle
-      run: ./gradlew build
+      run: |
+        ./gradlew build
+        ./gradlew :docklib-util:generateDebugFlagCache_com.android.car.dockutil --container system
