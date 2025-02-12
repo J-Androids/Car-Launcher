@@ -32,4 +32,5 @@ jobs:
     - name: Build with Gradle
       run: |
         ./gradlew build
+        /home/prebuilts/build-tools/linux-x86/bin/aconfig create-cache --package com.android.car.dockutil --container system
         ./gradlew :docklib-util:generateDebugFlagCache_com.android.car.dockutil --container system
