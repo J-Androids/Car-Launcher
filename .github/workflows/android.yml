@@ -28,6 +28,6 @@ jobs:
         sudo rm -rf /home/prebuilts/build-tools/
         sudo mkdir -p /home/prebuilts/build-tools/linux-x86/bin
         sudo chown -R $USER:$USER /home/prebuilts
-        git clone https://android.googlesource.com/platform/prebuilts/build-tools /home/prebuilts/build-tools
+        git clone https://android.googlesource.com/platform/prebuilts/build-tools /home/prebuilts
     - name: Build with Gradle
       run: ./gradlew build
